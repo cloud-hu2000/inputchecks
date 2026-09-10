@@ -1,0 +1,5 @@
+---
+interface Props { href: string; title: string; description: string; icon?: string; }
+const { href, title, description, icon = '→' } = Astro.props;
+---
+<a class="tool-card" href={href} data-track="related_tool_clicked"><span class="tool-card-icon">{icon}</span><span><strong>{title}</strong><small>{description}</small></span><span aria-hidden="true">→</span></a>

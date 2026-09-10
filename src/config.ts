@@ -1,0 +1,2 @@
+export const siteConfig = { name: 'InputChecks', url: import.meta.env.SITE_URL || 'https://inputchecks.com', defaultDescription: 'Free online mouse tests for scroll wheels, buttons, double clicks and polling rate.', gaId: import.meta.env.PUBLIC_GA_ID || '', adsenseClientId: import.meta.env.PUBLIC_ADSENSE_CLIENT_ID || '' };
+export function absoluteUrl(path = '/') { return new URL(path, siteConfig.url).toString(); }

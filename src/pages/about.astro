@@ -1,0 +1,4 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'; import Breadcrumbs from '../components/Breadcrumbs.astro'; const description='About InputChecks and its browser-based mouse utilities.';
+---
+<BaseLayout title="About InputChecks" {description} path="/about"><Breadcrumbs items={[{label:'About'}]}/><article class="content"><h1>About InputChecks</h1><p>InputChecks is a lightweight collection of browser-based utilities for checking common mouse input behavior. We build focused tools that are fast to open and clear about their limits.</p><h2>Local by default</h2><p>Mouse movement, click, and wheel samples used by our tests are processed in your browser. We do not offer accounts or cloud test histories.</p><h2>Our approach</h2><p>A browser can report input events; it cannot inspect the internal condition of your mouse. Our results describe observed input and encourage repeatable checks rather than definitive hardware claims.</p></article></BaseLayout>

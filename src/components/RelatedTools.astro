@@ -1,0 +1,11 @@
+---
+import ToolCard from './ToolCard.astro';
+const { current } = Astro.props as { current?: string };
+const tools = [
+  { id: 'wheel', href: '/', title: 'Scroll Wheel Test', description: 'Check scroll direction and jitter.', icon: '↕' },
+  { id: 'mouse', href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons, wheel and movement.', icon: '◉' },
+  { id: 'double', href: '/double-click-test', title: 'Double Click Test', description: 'Spot unexpected repeat clicks.', icon: '⠿' },
+  { id: 'polling', href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate input event frequency.', icon: '⌁' },
+];
+---
+<section class="related" aria-labelledby="related-heading"><h2 id="related-heading">Related mouse tests</h2><div class="tool-grid">{tools.filter((tool) => tool.id !== current).map((tool) => <ToolCard {...tool} />)}</div></section>
