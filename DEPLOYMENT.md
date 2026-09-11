@@ -74,12 +74,13 @@ npm run build
 当 DNS 和 HTTPS 均已生效后，逐项检查：
 
 - `https://inputchecks.com/` 能正常打开，且滚轮测试可以接收输入。
-- `https://inputchecks.com/robots.txt` 指向 `https://inputchecks.com/sitemap-index.xml`。
-- `https://inputchecks.com/sitemap-index.xml` 能正常访问，且只包含预期的 canonical 页面。
+- `https://inputchecks.com/robots.txt` 指向 `https://inputchecks.com/sitemap.xml`。
+- `https://inputchecks.com/sitemap.xml` 能正常访问，且只包含预期的 canonical 页面。
+- `https://inputchecks.com/llms.txt` 能正常访问，并列出网站的主要工具、指南和使用限制。
 - 首页 HTML 的 canonical URL 为 `https://inputchecks.com/`。
 - `https://www.inputchecks.com/` 会跳转到 `https://inputchecks.com/`。
 - 其余三个工具页与三篇指南页均能正常打开。
-- 在 Google Search Console 中添加 `inputchecks.com` 的网域资源（Domain property），完成验证后提交 `https://inputchecks.com/sitemap-index.xml`。
+- 在 Google Search Console 中添加 `inputchecks.com` 的网域资源（Domain property），完成验证后提交 `https://inputchecks.com/sitemap.xml`。
 
 ## 后续发布
 

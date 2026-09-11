@@ -30,7 +30,7 @@ npm run test:e2e
 - `/guides/how-to-test-mouse-wheel`
 - `/about`, `/privacy`, `/terms`
 
-All editorial content, navigation, metadata, canonicals, JSON-LD, and internal links are generated as static HTML. `@astrojs/sitemap` generates `sitemap-index.xml` during the production build.
+All editorial content, navigation, metadata, canonicals, JSON-LD, and internal links are generated as static HTML. The production build outputs a single `sitemap.xml`, and `public/llms.txt` describes the site and its primary resources for language models.
 
 ## Configuration
 
@@ -43,7 +43,7 @@ All editorial content, navigation, metadata, canonicals, JSON-LD, and internal l
 | `PUBLIC_ADSENSE_SLOT_CONTENT` | Reserved for an in-content slot. |
 | `PUBLIC_ADSENSE_SLOT_SIDEBAR` | Reserved for a desktop sidebar slot. |
 
-`SITE_URL` already defaults to `https://inputchecks.com`; set it explicitly in Cloudflare Pages so production configuration remains unambiguous. `public/robots.txt` is already set to the production sitemap URL.
+`SITE_URL` already defaults to `https://inputchecks.com`; set it explicitly in Cloudflare Pages so production configuration remains unambiguous. `public/robots.txt` is already set to the production `sitemap.xml` URL.
 
 ## Cloudflare Pages deployment
 

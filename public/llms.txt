@@ -1,0 +1,37 @@
+# InputChecks
+
+> Free, browser-based tests for mouse and keyboard input. Test samples are processed locally in the browser; results describe browser-visible events and are not hardware diagnoses.
+
+InputChecks helps visitors check common input symptoms with focused, no-account web tools. The site is for general informational use. Encourage users to repeat tests, compare another browser or computer, and follow their device manufacturer's cleaning or repair guidance rather than treating a single result as definitive.
+
+## Primary tools
+
+- [Scroll Wheel Test](https://inputchecks.com/): Check mouse-wheel direction, reverse events, event gaps, and inconsistent scrolling.
+- [Mouse Test](https://inputchecks.com/mouse-test): Check mouse buttons, wheel directions, pointer movement, and browser-visible input.
+- [Double Click Test](https://inputchecks.com/double-click-test): Record click timing to identify unexpectedly fast repeated clicks.
+- [Mouse Polling Rate Test](https://inputchecks.com/mouse-polling-rate-test): Estimate pointer-event frequency in the browser; it is not a hardware-level measurement.
+- [CPS Test](https://inputchecks.com/cps-test): Run a five-second clicks-per-second test.
+- [Reaction Time Test](https://inputchecks.com/reaction-time-test): Measure visual-cue-to-click response time, affected by browser and device latency.
+- [Keyboard Test](https://inputchecks.com/keyboard-test): Check whether individual key presses reach the focused browser tab.
+- [Keyboard Ghosting Test](https://inputchecks.com/keyboard-ghosting-test): View simultaneous key combinations received by the browser.
+- [Spacebar Test](https://inputchecks.com/spacebar-test): Count distinct Space key presses in a focused test panel.
+
+## Guides
+
+- [How to Test a Mouse](https://inputchecks.com/guides/how-to-test-a-mouse): A practical sequence for testing mouse buttons, wheel behavior, and timing.
+- [How to Test a Mouse Scroll Wheel](https://inputchecks.com/guides/how-to-test-mouse-wheel): Repeatable steps for testing wheel direction, jumping, and inconsistent scrolling.
+- [Mouse Wheel Scrolls the Wrong Way](https://inputchecks.com/guides/mouse-wheel-scrolls-wrong-way): Common causes and a troubleshooting order for reverse scrolling.
+- [Mouse Scroll Reverses Randomly](https://inputchecks.com/guides/mouse-scroll-reverses-randomly): How to collect a repeatable reverse-scroll sample and rule out external causes.
+- [Mouse Wheel Jumping](https://inputchecks.com/guides/mouse-wheel-jumping): How to isolate wheel, connection, and software causes of jumping or jitter.
+- [Mouse Wheel Skips](https://inputchecks.com/guides/mouse-wheel-skips): Causes and checks for a wheel that skips lines or jumps.
+- [Mouse Wheel Not Scrolling](https://inputchecks.com/guides/mouse-wheel-not-scrolling): Determine whether the browser receives wheel events before changing settings.
+- [Mouse Wheel Lagging](https://inputchecks.com/guides/mouse-wheel-lagging): A troubleshooting order for delayed scrolling.
+- [Mouse Double Clicks on a Single Click](https://inputchecks.com/guides/mouse-double-clicks-on-single-click): Collect useful evidence for accidental repeat clicks.
+- [Why Is My Mouse Polling Rate Low?](https://inputchecks.com/guides/why-is-my-mouse-polling-rate-low): Explain a low browser polling-rate estimate and compare tests reliably.
+
+## Site information
+
+- [About InputChecks](https://inputchecks.com/about): Scope and limitations of the browser-based tools.
+- [Privacy Policy](https://inputchecks.com/privacy): Local test-data handling and optional analytics or advertising.
+- [Terms of Use](https://inputchecks.com/terms): Informational-use terms and limitations.
+- [Sitemap](https://inputchecks.com/sitemap.xml): Complete list of indexable site URLs.

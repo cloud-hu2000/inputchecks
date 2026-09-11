@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://inputchecks.com/sitemap-index.xml
+Sitemap: https://inputchecks.com/sitemap.xml
