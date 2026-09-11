@@ -1,0 +1,17 @@
+<section class="tester cps-tester" data-cps-tester><button class="click-target cps-target" data-cps-target aria-label="Start CPS test">Start clicking</button><div class="metrics four" aria-live="polite"><div><span>Clicks</span><strong data-cps-clicks>0</strong></div><div><span>Time left</span><strong data-cps-time>5.0 s</strong></div><div><span>Current CPS</span><strong data-cps-current>—</strong></div><div><span>Result CPS</span><strong data-cps-best>—</strong></div></div><p class="result-note collecting" data-cps-result aria-live="polite">Click the target once to start a five-second round.</p><button class="button text-button" data-cps-reset>Reset test</button></section>
+<script>
+  const tester = document.querySelector<HTMLElement>('[data-cps-tester]');
+  if (tester) {
+    const target = tester.querySelector<HTMLButtonElement>('[data-cps-target]')!;
+    const clicks = tester.querySelector<HTMLElement>('[data-cps-clicks]')!;
+    const time = tester.querySelector<HTMLElement>('[data-cps-time]')!;
+    const current = tester.querySelector<HTMLElement>('[data-cps-current]')!;
+    const score = tester.querySelector<HTMLElement>('[data-cps-best]')!;
+    const result = tester.querySelector<HTMLElement>('[data-cps-result]')!;
+    let count = 0, start = 0, timer = 0, running = false;
+    const reset = () => { window.clearInterval(timer); count = 0; start = 0; running = false; clicks.textContent = '0'; time.textContent = '5.0 s'; current.textContent = '—'; score.textContent = '—'; target.textContent = 'Start clicking'; target.disabled = false; result.textContent = 'Click the target once to start a five-second round.'; };
+    const finish = () => { window.clearInterval(timer); running = false; target.disabled = true; const value = count / 5; current.textContent = value.toFixed(1); score.textContent = value.toFixed(1); time.textContent = '0.0 s'; result.textContent = `Round complete: ${count} clicks in 5 seconds (${value.toFixed(1)} CPS). Reset to try again.`; };
+    target.addEventListener('click', () => { if (!running) { running = true; start = performance.now(); target.textContent = 'Keep clicking'; timer = window.setInterval(() => { const left = Math.max(0, 5000 - (performance.now() - start)); time.textContent = `${(left / 1000).toFixed(1)} s`; current.textContent = (count / Math.max(.1, (performance.now() - start) / 1000)).toFixed(1); if (!left) finish(); }, 50); } if (running) { count++; clicks.textContent = String(count); } });
+    tester.querySelector('[data-cps-reset]')?.addEventListener('click', reset);
+  }
+</script>

@@ -20,3 +20,7 @@ Consult these guides before working on related tasks:
 - [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
 - [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
 - [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+
+## Tool-page workflow
+
+Before adding a new tool or landing page, read and follow `.agents/skills/inputchecks-tool-pages/SKILL.md`. Its pre-creation recommendation and explicit user-confirmation gate is mandatory.

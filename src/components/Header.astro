@@ -1,4 +1,62 @@
 ---
 import { siteConfig } from '../config';
+import '../styles/header.css';
+
+const inputTools = [
+  { href: '/', title: 'Scroll Wheel Test', description: 'Check direction, skips and jitter.', icon: '↕' },
+  { href: '/mouse-test', title: 'Mouse Test', description: 'Test buttons, movement and wheel input.', icon: '◉' },
+  { href: '/double-click-test', title: 'Double Click Test', description: 'Spot unwanted repeat clicks.', icon: '⠿' },
+  { href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate pointer event frequency.', icon: '⌁' },
+  { href: '/cps-test', title: 'CPS Test', description: 'Measure clicks per second.', icon: '⚡' },
+  { href: '/keyboard-test', title: 'Keyboard Test', description: 'Check keys in your browser.', icon: '⌨' },
+  { href: '/keyboard-ghosting-test', title: 'Keyboard Ghosting Test', description: 'Test simultaneous key presses.', icon: '▦' },
+  { href: '/spacebar-test', title: 'Spacebar Test', description: 'Check every spacebar press.', icon: '▁' },
+  { href: '/reaction-time-test', title: 'Reaction Time Test', description: 'Measure visual reaction time.', icon: '◌' },
+];
+
+const pathname = Astro.url.pathname;
+const isInputTool = inputTools.some((tool) => tool.href === pathname);
 ---
-<header class="site-header"><div class="shell header-inner"><a class="brand" href="/" aria-label={`${siteConfig.name} home`}><span class="brand-mark">I</span>{siteConfig.name}</a><nav aria-label="Main navigation"><a href="/">Wheel test</a><a href="/mouse-test">Mouse test</a><a href="/double-click-test">Double click</a><a href="/mouse-polling-rate-test">Polling rate</a></nav></div></header>
+
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="brand" href="/" aria-label={`${siteConfig.name} home`}>
+      <img class="brand-logo" src="/site-logo.png" width="36" height="36" alt="" />
+      {siteConfig.name}
+    </a>
+    <nav class="tool-navigation" aria-label="Test categories">
+      <details class="category-menu">
+        <summary class:list={{ active: isInputTool }}><span>Input devices</span><svg viewBox="0 0 12 8" aria-hidden="true"><path d="m1 1.5 5 5 5-5" /></svg></summary>
+        <div class="tool-menu" role="group" aria-label="Input device tests">
+          <div class="tool-menu-heading"><span class="tool-menu-kicker">Input devices</span><strong>Choose a test</strong></div>
+          <div class="tool-menu-list">
+            {inputTools.map((tool) => (
+              <a class:list={{ 'tool-menu-item': true, current: tool.href === pathname }} href={tool.href}>
+                <span class="tool-menu-icon" aria-hidden="true">{tool.icon}</span>
+                <span><strong>{tool.title}</strong><small>{tool.description}</small></span>
+                <span class="tool-menu-arrow" aria-hidden="true">→</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </details>
+      {['Game controllers', 'Multimedia devices', 'Displays'].map((category) => (
+        <details class="category-menu category-menu--coming-soon">
+          <summary><span>{category}</span><svg viewBox="0 0 12 8" aria-hidden="true"><path d="m1 1.5 5 5 5-5" /></svg></summary>
+          <div class="tool-menu tool-menu--empty"><span class="tool-menu-icon" aria-hidden="true">+</span><div><strong>{category} tests are coming soon</strong><p>This category is ready for new tools as they are added.</p></div></div>
+        </details>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  document.querySelectorAll('.category-menu').forEach((menu) => {
+    menu.addEventListener('toggle', () => {
+      if (!(menu instanceof HTMLDetailsElement) || !menu.open) return;
+      document.querySelectorAll('.category-menu').forEach((otherMenu) => {
+        if (otherMenu !== menu && otherMenu instanceof HTMLDetailsElement) otherMenu.open = false;
+      });
+    });
+  });
+</script>

@@ -1,11 +1,35 @@
 ---
 import ToolCard from './ToolCard.astro';
-const { current } = Astro.props as { current?: string };
-const tools = [
-  { id: 'wheel', href: '/', title: 'Scroll Wheel Test', description: 'Check scroll direction and jitter.', icon: '↕' },
-  { id: 'mouse', href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons, wheel and movement.', icon: '◉' },
-  { id: 'double', href: '/double-click-test', title: 'Double Click Test', description: 'Spot unexpected repeat clicks.', icon: '⠿' },
-  { id: 'polling', href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate input event frequency.', icon: '⌁' },
-];
+import ToolPageSeoContent from './ToolPageSeoContent.astro';
+const { current } = Astro.props as { current: string };
+const tools = {
+  wheel: { href: '/', title: 'Scroll Wheel Test', description: 'Check direction, skips and jitter.', icon: '↕' },
+  mouse: { href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons, wheel and movement.', icon: '◉' },
+  double: { href: '/double-click-test', title: 'Double Click Test', description: 'Spot unexpected repeat clicks.', icon: '⠿' },
+  polling: { href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate pointer event frequency.', icon: '⌁' },
+  cps: { href: '/cps-test', title: 'CPS Test', description: 'Measure clicks per second.', icon: '⚡' },
+  keyboard: { href: '/keyboard-test', title: 'Keyboard Test', description: 'Check keys in your browser.', icon: '⌨' },
+  ghosting: { href: '/keyboard-ghosting-test', title: 'Keyboard Ghosting Test', description: 'Check simultaneous key presses.', icon: '▦' },
+  spacebar: { href: '/spacebar-test', title: 'Spacebar Test', description: 'Check every spacebar press.', icon: '▁' },
+  reaction: { href: '/reaction-time-test', title: 'Reaction Time Test', description: 'Measure visual reaction time.', icon: '◌' },
+} as const;
+const related: Record<string, Array<keyof typeof tools>> = {
+  wheel: ['mouse', 'polling', 'double', 'keyboard'], mouse: ['wheel', 'double', 'polling', 'keyboard'],
+  double: ['mouse', 'cps', 'polling', 'wheel'], polling: ['mouse', 'cps', 'reaction', 'wheel'],
+  cps: ['double', 'reaction', 'keyboard', 'mouse'], keyboard: ['ghosting', 'spacebar', 'cps', 'mouse'],
+  ghosting: ['keyboard', 'spacebar', 'cps', 'mouse'], spacebar: ['keyboard', 'ghosting', 'cps', 'reaction'],
+  reaction: ['cps', 'double', 'keyboard', 'mouse'],
+};
+const troubleshooting: Record<string, Array<{ href: string; title: string }>> = {
+  wheel: [
+    { href: '/guides/mouse-wheel-not-scrolling', title: 'Mouse wheel not scrolling' },
+    { href: '/guides/mouse-wheel-skips', title: 'Mouse wheel skips' },
+    { href: '/guides/mouse-scroll-reverses-randomly', title: 'Mouse scroll reverses randomly' },
+  ],
+  mouse: [{ href: '/guides/how-to-test-a-mouse', title: 'How to test a mouse' }],
+  double: [{ href: '/guides/mouse-double-clicks-on-single-click', title: 'Mouse double clicks on a single click' }],
+  polling: [{ href: '/guides/why-is-my-mouse-polling-rate-low', title: 'Why is my mouse polling rate low?' }],
+};
 ---
-<section class="related" aria-labelledby="related-heading"><h2 id="related-heading">Related mouse tests</h2><div class="tool-grid">{tools.filter((tool) => tool.id !== current).map((tool) => <ToolCard {...tool} />)}</div></section>
+{['cps', 'keyboard', 'ghosting', 'spacebar', 'reaction'].includes(current) && <ToolPageSeoContent current={current as 'cps' | 'keyboard' | 'ghosting' | 'spacebar' | 'reaction'} />}
+<section class="related" aria-labelledby="related-heading"><h2 id="related-heading">Related tests</h2><div class="tool-grid">{related[current].map((id) => <ToolCard {...tools[id]} />)}</div>{troubleshooting[current] && <div class="tool-troubleshooting"><h3>Troubleshooting guides</h3><p>{troubleshooting[current].map((guide, index) => <><a href={guide.href}>{guide.title}</a>{index < troubleshooting[current].length - 1 && <span aria-hidden="true"> · </span>}</>)}</p></div>}</section>
