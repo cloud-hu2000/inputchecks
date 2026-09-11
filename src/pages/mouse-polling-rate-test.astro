@@ -1,4 +1,61 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'; import PollingTool from '../components/PollingTool.astro'; import RelatedTools from '../components/RelatedTools.astro'; import Breadcrumbs from '../components/Breadcrumbs.astro'; import JsonLd from '../components/seo/JsonLd.astro'; import { absoluteUrl } from '../config'; const description='Estimate mouse polling rate from pointer events in your browser with a free online test.';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PollingTool from '../components/PollingTool.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Run a free mouse polling rate test to estimate browser pointer-event frequency, compare mouse Hz results, and troubleshoot inconsistent input timing.';
+const faq = [
+  { question: 'Is this polling rate result exact?', answer: 'No. It is a browser-based estimate from pointer-event timing. Operating-system scheduling, browser behavior, display refresh, movement speed, and system load can all affect the reading.' },
+  { question: 'Why is the peak rate much higher than the average?', answer: 'A single short event interval can produce a high instantaneous peak. The average across a longer, steady sample is usually the more useful number to compare.' },
+  { question: 'How do I get a more stable polling-rate estimate?', answer: 'Use a physical mouse, move it continuously in the test area for 10 to 15 seconds, avoid heavy background tasks, and repeat the test two or three times.' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Mouse Polling Rate Test', url: absoluteUrl('/mouse-polling-rate-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
 ---
-<BaseLayout title="Mouse Polling Rate Test – Estimate Mouse Input Frequency" {description} path="/mouse-polling-rate-test"><JsonLd data={{'@context':'https://schema.org','@type':'WebApplication',name:'Mouse Polling Rate Test',url:absoluteUrl('/mouse-polling-rate-test'),applicationCategory:'UtilitiesApplication',operatingSystem:'Any',offers:{'@type':'Offer',price:'0',priceCurrency:'USD'}}}/><Breadcrumbs items={[{label:'Mouse Polling Rate Test'}]}/><section class="page-hero shell compact"><p class="eyebrow">Pointer event estimate</p><h1>Mouse Polling Rate Test</h1><p>Estimate how often your browser receives mouse movement events.</p></section><PollingTool/><article class="content"><h2>About browser polling-rate estimates</h2><p>This tool estimates the rate from pointer events; it is not a laboratory measurement. Operating-system scheduling, browser behavior, display refresh, system load, and the connection itself influence the number shown.</p><RelatedTools current="polling"/></article></BaseLayout>
+
+<BaseLayout title="Mouse Polling Rate Test – Check Mouse Hz Online" {description} path="/mouse-polling-rate-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Mouse Polling Rate Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Mouse Polling Rate Test</h1>
+    <p>Estimate how often your browser receives mouse movement events.</p>
+  </section>
+  <PollingTool />
+  <article class="content">
+    <h2>How to Use This Mouse Polling Rate Test</h2>
+    <p>Move a physical mouse continuously inside the large test area for 10 to 15 seconds. The current number shows the latest interval converted to hertz, the average summarizes the collected intervals, the peak records the fastest single interval, and Samples counts the movement events received. Keep your motion smooth and avoid pausing at the edge of the panel. Once you have at least 100 samples, the average becomes more useful than a reading taken from only a few movements.</p>
+    <p>For a fair comparison, use the same computer, port, surface, browser, and mouse setting for each run. Make two or three passes instead of treating one number as definitive. Browser-based tests are excellent for spotting broad differences—such as whether a setting change clearly altered the event rate—but they are not laboratory instruments. The page reports when the browser receives movement, not a direct electrical measurement from the mouse sensor.</p>
+
+    <h2>What Is a Mouse Polling Rate?</h2>
+    <p>Mouse polling rate is commonly used to describe how often an input device reports its state to the host system, usually expressed in hertz (Hz). A nominal 125 Hz setting suggests an interval near 8 milliseconds; 500 Hz suggests about 2 milliseconds; and 1,000 Hz suggests about 1 millisecond. Those are simple conversions from frequency, not promises that every browser event will arrive at exactly that spacing.</p>
+    <p>Input devices commonly use the USB Human Interface Device class. The <a href="https://www.usb.org/document-library/device-class-definition-hid-111" rel="noopener noreferrer">USB-IF HID 1.11 class definition</a> is an authoritative reference for this standardized device category. Between the device and this page, however, the operating system, connection method, browser, rendering work, and event scheduling all influence what a browser can observe. That is why this test labels its result as an estimate.</p>
+
+    <h2>How the Browser Polling Rate Estimate Works</h2>
+    <p>Each time the browser sends a pointer-movement event to the test area, this tool records a timestamp. It calculates the gap between consecutive timestamps and converts that gap into a rate: 1,000 divided by the gap in milliseconds. For example, a 4-millisecond gap corresponds to 250 Hz. The current value uses the newest gap, the peak uses the fastest gap collected, and the average combines the rates from the available sample.</p>
+    <p>This approach is intentionally transparent, but it has limits. Event coalescing, a busy browser main thread, a high-refresh display, power-saving behavior, Bluetooth radio conditions, and how quickly you move the mouse can change the stream of events. A very high peak may be only one unusually short gap; it does not prove that the mouse sustained that exact rate. Compare longer averages and repeatable trends instead of chasing a single maximum.</p>
+
+    <h2>What Is a Good Mouse Polling Rate?</h2>
+    <p>There is no universally best setting. For ordinary browsing, office work, and most creative tasks, a stable, comfortable mouse matters more than a high headline number. Competitive gaming can make higher report rates attractive to some players, but they may increase CPU work or make wireless battery life shorter depending on the device. The useful question is whether your configured setting and your observed browser estimate are broadly consistent, and whether the mouse feels responsive and reliable in the software you use.</p>
+    <p>Do not compare different devices too literally. A compact Bluetooth travel mouse, a wired office mouse, and a gaming mouse with a dedicated receiver can be designed for different trade-offs. If a manufacturer utility offers several rates, change only one setting at a time and retest. Note the average over a similar 10- to 15-second movement sample, rather than comparing a peak from one run with an average from another.</p>
+
+    <h2>Why a Polling Rate Test Can Look Lower Than Expected</h2>
+    <p>A lower browser estimate does not automatically mean the mouse is faulty. First, confirm the device’s selected rate in its official software or system settings. Then test while connected directly to the computer, with the laptop plugged in if it uses an aggressive power-saving mode. Close demanding background apps and try another browser. For wireless devices, charge the battery, move the receiver closer, and avoid placing it beside congested USB 3 ports or other radio equipment.</p>
+    <p>Movement technique matters as well. If you stop, lift the mouse, or move only a few pixels, the browser has fewer events to measure. Use a clean, consistent mouse surface and make medium-speed loops or side-to-side motions inside the panel. If readings vary widely between runs, the variance itself is informative: repeat the test after changing one environmental factor. If a lower-than-expected rate follows the mouse across computers, consult the manufacturer’s support documentation for its configuration and connection guidance.</p>
+
+    <h2>Polling Rate Is Not the Same as Mouse Performance</h2>
+    <p>Polling rate is one part of perceived responsiveness, not a complete performance score. Sensor behavior, click latency, wireless stability, display refresh, application frame rate, CPU load, and operating-system settings also affect how a mouse feels. A device can show a healthy event-frequency estimate while a particular button misbehaves, and a perfectly functioning button can coexist with a noisy wheel. Use the <a href="/mouse-test">mouse test</a> to check buttons, movement, and scroll directions separately.</p>
+    <p>If scrolling feels inconsistent, the <a href="/">scroll wheel test</a> looks specifically for reverse events and irregular wheel input. If a left click creates duplicates, run the <a href="/double-click-test">double click test</a>. Keeping these checks separate makes the results easier to act on: event frequency answers one question, while a button or wheel test answers another.</p>
+
+    <h2>Get a Repeatable Mouse Hz Result</h2>
+    <p>Start with a fresh reset, keep the pointer within the test zone, and collect a sustained sample. Record the average, not just the peak, and compare it with the setting you chose. Repeat after each meaningful change—such as switching from Bluetooth to a receiver, choosing a different port, or changing the configured rate. This method will not replace manufacturer diagnostics, but it gives you a consistent browser-side view of mouse input timing and a reliable way to verify a broad change.</p>
+
+    <RelatedTools current="polling" />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

@@ -1,4 +1,58 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'; import MouseTool from '../components/MouseTool.astro'; import RelatedTools from '../components/RelatedTools.astro'; import Breadcrumbs from '../components/Breadcrumbs.astro'; import JsonLd from '../components/seo/JsonLd.astro'; import { absoluteUrl } from '../config'; const description='Check mouse buttons, scroll wheel directions and movement with this free interactive mouse test.';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MouseTool from '../components/MouseTool.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Run a free mouse test to check left, right, middle, back and forward buttons, scroll directions, pointer movement, and common input issues in your browser.';
+const faq = [
+  { question: 'Does this mouse test install anything?', answer: 'No. The test runs in the browser and reports the mouse input events that reach this page. It does not install software or change device settings.' },
+  { question: 'Why are Back and Forward still waiting?', answer: 'Many mice do not include side buttons. If yours does, try pressing them while the test panel is active; browser or operating-system shortcuts can otherwise intercept them.' },
+  { question: 'Can a mouse test confirm a hardware failure?', answer: 'No. It is a useful first check, but it cannot inspect the switch, cable, battery, receiver, or driver. Compare results in another browser or on another computer before deciding that hardware has failed.' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Mouse Test', url: absoluteUrl('/mouse-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
 ---
-<BaseLayout title="Mouse Test – Check Mouse Buttons & Scroll Wheel" {description} path="/mouse-test"><JsonLd data={{'@context':'https://schema.org','@type':'WebApplication',name:'Mouse Test',url:absoluteUrl('/mouse-test'),applicationCategory:'UtilitiesApplication',operatingSystem:'Any',offers:{'@type':'Offer',price:'0',priceCurrency:'USD'}}}/><Breadcrumbs items={[{label:'Mouse Test'}]}/><section class="page-hero shell compact"><p class="eyebrow">Mouse input utility</p><h1>Mouse Test</h1><p>Check buttons, scroll directions, and pointer movement in one place.</p></section><MouseTool/><article class="content"><h2>How this mouse test works</h2><p>Use the large test area naturally. Each available button and movement signal is marked when your browser receives it. Some mice do not have Back or Forward buttons, so those checks may remain waiting.</p><RelatedTools current="mouse"/></article></BaseLayout>
+
+<BaseLayout title="Mouse Test – Check Buttons, Wheel & Movement" {description} path="/mouse-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Mouse Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Mouse Test</h1>
+    <p>Check buttons, scroll directions, and pointer movement in one place.</p>
+  </section>
+  <MouseTool />
+  <article class="content">
+    <h2>How to Use This Mouse Test</h2>
+    <p>This free mouse test gives you one focused place to check the browser-visible signals from a wired, wireless, or Bluetooth mouse. Start by moving the pointer inside the test panel. Then press each button once, roll the wheel up and down, and watch the eight status cards change from Waiting to Detected. The test is intentionally simple: it records the event the browser receives, so you can tell whether a particular action is reaching the computer at all.</p>
+    <p>For a useful baseline, make one calm pass through the test rather than clicking rapidly. Check the left, right, and middle buttons first; then try any Back and Forward side buttons your mouse has. Finally, move the pointer in several directions and scroll in both directions. A typical three-button mouse without side buttons will complete six of the eight checks. That is normal—the two side-button cards are not a score you need to achieve.</p>
+
+    <h2>What This Online Mouse Test Checks</h2>
+    <p>The panel looks for left, right, middle, back, and forward button presses; pointer movement; scroll up; and scroll down. Those eight checks cover the common controls people notice when a mouse begins to feel unreliable. The page does not collect raw mouse coordinates, save a click history, or inspect other applications. It only updates the visible status while this tab is open.</p>
+    <p>A browser receives input as standardized user-interface events. The <a href="https://www.w3.org/TR/uievents/" rel="noopener noreferrer">W3C UI Events specification</a> describes this event model and its role in browser interaction. That distinction matters: a detected event shows that the device, operating system, and browser successfully delivered an input to this page. It does not prove that every game, creative application, or desktop shortcut will react in exactly the same way.</p>
+
+    <h2>Test Mouse Buttons One at a Time</h2>
+    <p>If a button appears not to work, test it slowly and deliberately two or three times. Keep the pointer in the panel and avoid holding modifier keys such as Control, Option, or Shift, because those combinations can trigger browser functions. Right-clicking may open a browser context menu on some systems; close it and return to the panel if it covers the result. A side button can also navigate back or forward before the page has a chance to display a result, depending on your browser settings.</p>
+    <p>When only one button fails, compare it with the others. A left button that intermittently misses presses or registers two presses may indicate a different issue from a mouse that is completely disconnected. Run the dedicated <a href="/double-click-test">double click test</a> if the left button seems to create accidental repeat clicks. If no buttons or movement are detected, check the connection, battery, receiver, USB port, and operating-system device settings before assuming the switch itself is damaged.</p>
+
+    <h2>Check Mouse Wheel Direction and Movement</h2>
+    <p>The two scroll cards confirm that the browser received both up and down wheel input. They are a quick functional check, not a measurement of wheel smoothness. If a card changes reliably but pages jump, reverse, or skip during daily use, use the more detailed <a href="/">scroll wheel test</a>. Its event graph can make reverse input and irregular gaps easier to see during a continuous roll.</p>
+    <p>Pointer movement is also worth checking separately. A cursor that freezes can have a different cause from a click that does not register: wireless interference, a low battery, a dirty optical sensor, a reflective desk surface, or a loose cable can affect movement before buttons are affected. Test on a plain, non-reflective surface and temporarily bypass docks or USB hubs when possible. For wireless models, move the receiver closer to the mouse and retest.</p>
+
+    <h2>When a Mouse Test Shows a Problem</h2>
+    <p>Repeatable results are more valuable than a single missed click. Run the same test in a second browser, then try the mouse on another computer if one is available. If the problem follows the mouse, it is more likely to be related to the device, its cable, its battery, or its receiver. If it happens only on one computer, update or reconnect the device there and review any mouse utility, remapping, accessibility, or gaming software that may be changing button behavior.</p>
+    <p>For a wired mouse, unplug and reconnect it directly to a known-good port. For a wireless mouse, charge or replace the battery, reseat the receiver, and remove nearby sources of interference. Clean the sensor opening and the wheel area only in the way the manufacturer recommends. Do not spray liquid into a switch or wheel mechanism. If the mouse is under warranty, a concise record—such as “left button missed 4 of 20 slow presses on two computers”—will be more useful to support than a general description that it feels inconsistent.</p>
+
+    <h2>Limits of a Browser Mouse Test</h2>
+    <p>This tool cannot measure click force, inspect a physical switch, confirm a USB polling setting, or diagnose a driver. It also cannot test inputs that the browser never receives, such as a button remapped exclusively inside a game. High-DPI settings can change how far the cursor travels on screen without changing whether movement events are delivered. For input-frequency questions, use the separate <a href="/mouse-polling-rate-test">mouse polling rate test</a>; it estimates event timing rather than button behavior.</p>
+    <p>Use this page as a practical first step: verify which of the eight everyday controls work, reproduce any failure with steady input, and then compare the result across software or hardware. That small, repeatable process separates a one-off browser issue from a pattern worth troubleshooting further.</p>
+
+    <RelatedTools current="mouse" />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

@@ -1,4 +1,64 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'; import DoubleClickTool from '../components/DoubleClickTool.astro'; import RelatedTools from '../components/RelatedTools.astro'; import Breadcrumbs from '../components/Breadcrumbs.astro'; import JsonLd from '../components/seo/JsonLd.astro'; import { absoluteUrl } from '../config'; const description='Test for possible unintended mouse double clicks by measuring the timing of repeated clicks.';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DoubleClickTool from '../components/DoubleClickTool.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Use this free double click test to spot fast repeated mouse clicks, understand timing results, and troubleshoot switch, connection, or software issues.';
+const faq = [
+  { question: 'What counts as an unexpected double click here?', answer: 'This page flags two pointer presses that arrive within 80 milliseconds. That flag is a cue to collect a larger sample, not a conclusive hardware diagnosis.' },
+  { question: 'Why does the test show normal double clicks?', answer: 'The test counts any two presses within 300 milliseconds as a double click. Deliberate fast clicks and normal double-click actions can therefore appear in the count.' },
+  { question: 'How many clicks should I test?', answer: 'Make at least 20 to 30 relaxed, evenly spaced clicks. Repeat on another browser or computer if unusually short intervals keep appearing.' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Double Click Test', url: absoluteUrl('/double-click-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
 ---
-<BaseLayout title="Double Click Test – Detect Unintended Mouse Double Clicks" {description} path="/double-click-test"><JsonLd data={{'@context':'https://schema.org','@type':'WebApplication',name:'Double Click Test',url:absoluteUrl('/double-click-test'),applicationCategory:'UtilitiesApplication',operatingSystem:'Any',offers:{'@type':'Offer',price:'0',priceCurrency:'USD'}}}/><Breadcrumbs items={[{label:'Double Click Test'}]}/><section class="page-hero shell compact"><p class="eyebrow">Click timing utility</p><h1>Double Click Test</h1><p>Check whether a single press may be generating unexpectedly fast repeated input.</p></section><DoubleClickTool/><article class="content"><h2>Interpreting your result</h2><p>Fast intentional clicks and normal double clicks can appear in this test. The result is most useful when you click at a relaxed, consistent pace and still see very short intervals. It is a browser observation, not a hardware diagnosis.</p><RelatedTools current="double"/></article></BaseLayout>
+
+<BaseLayout title="Double Click Test – Detect Mouse Double Click Issues" {description} path="/double-click-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Double Click Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Double Click Test</h1>
+    <p>Check whether a single press may be generating unexpectedly fast repeated input.</p>
+  </section>
+  <DoubleClickTool />
+  <article class="content">
+    <h2>How to Use the Double Click Test</h2>
+    <p>Use the large Click here target to make a steady sample of ordinary left-button presses. Aim for 20 to 30 relaxed clicks, about one click every second, rather than intentionally double-clicking. The counters update after each press: Total Clicks is the number of presses collected, Double Clicks is the number of neighboring presses received within 300 milliseconds, and Minimum Interval is the shortest gap in your sample. The test keeps only the most recent 100 clicks, so a new run stays easy to interpret.</p>
+    <p>Most importantly, look for a pattern. One unusually fast interval can come from your own timing, a finger bounce, or an accidental extra press. If the Unexpected Double Clicks counter rises while you are clicking slowly and evenly, reset the test and repeat it. A result that appears in several runs is more useful than a single warning. This page observes pointer presses received by the browser; it does not open the mouse or inspect the physical switch.</p>
+
+    <h2>What Does an Online Double Click Test Measure?</h2>
+    <p>A double click test measures elapsed time between adjacent button-down events. On this page, a gap of 300 milliseconds or less is counted as a double click, because many interfaces treat two fast presses as a double-click action. Gaps of 80 milliseconds or less are called out as unexpectedly short to help distinguish deliberate quick clicking from possible repeated input. These values are practical signals for comparison, not a universal definition of a faulty mouse.</p>
+    <p>Browsers expose mouse and click interaction through standard events. The <a href="https://www.w3.org/TR/uievents/" rel="noopener noreferrer">W3C UI Events specification</a> documents the browser event model used for user interaction. The page can therefore tell you the timing that reached this tab, but it cannot determine where an extra event originated. A worn switch, a cable problem, receiver interference, remapping software, or a user’s own click rhythm can all require different follow-up checks.</p>
+
+    <h2>Why a Mouse May Double Click by Itself</h2>
+    <p>Unwanted repeat clicks are often described as “double-clicking by itself.” On an older mouse, a mechanical switch can become inconsistent. On a wireless mouse, low power, a loose receiver, interference, or a connection problem may also affect input. Software can be involved too: button remapping tools, macros, accessibility settings, game overlays, and vendor utilities may change what an application receives. The symptom alone does not identify the cause, which is why a controlled test is a sensible starting point.</p>
+    <p>First, make sure the result is not being created by the test method. Rest your hand comfortably, press and release fully, and pause between clicks. Avoid tapping the button with a fingernail or clicking near the edge of the shell, both of which can produce a different feel. Then repeat the sample in another browser. If the issue only appears in one application, it may be application-specific rather than a mouse-switch failure.</p>
+
+    <h2>How to Interpret Double Click Test Results</h2>
+    <p>If you intentionally double-click the target, the Double Clicks total should rise; that is expected. If you make slow, separate presses and it remains at zero over several 20-click samples, the browser did not see a very short repeat interval during those tests. This is reassuring, although it does not guarantee that a rare issue will never occur. Problems that appear once every few hundred presses may need a longer test session or a different diagnostic method.</p>
+    <p>If Unexpected Double Clicks appears repeatedly during slow clicks, note the pattern. Does it happen with the left button only? Does it change after charging the mouse or moving the receiver? Does it follow the mouse to a second computer? These observations make the next decision clearer. Test the device as a whole on the <a href="/mouse-test">mouse test</a>, too: a related movement or scroll issue can point toward a connection or power problem rather than one isolated button.</p>
+
+    <h2>Steps to Troubleshoot Accidental Double Clicks</h2>
+    <ol>
+      <li>Reset this double click test and collect two or three samples of 20 to 30 slow clicks.</li>
+      <li>Try the same mouse in another browser and, where possible, on another computer.</li>
+      <li>Reconnect a wired mouse directly to a different USB port, or charge a wireless model and reseat its receiver.</li>
+      <li>Temporarily disable remapping, macro, gaming, or accessibility software that changes button behavior.</li>
+      <li>Check the manufacturer’s support guidance before cleaning or servicing a switch; do not introduce liquid into the mouse.</li>
+    </ol>
+    <p>If the repeat-click pattern follows the device across systems after these checks, record the results and contact the manufacturer or retailer if the mouse is covered. If it occurs only on one system, focus on that computer’s software and connection path. Replacing a mouse immediately can solve the symptom, but a short comparison first can prevent you from replacing hardware when the cause is a setting or receiver.</p>
+
+    <h2>Limits of This Mouse Double Click Test</h2>
+    <p>This tool does not diagnose hardware health or guarantee a click will register correctly inside every program. It measures timing, not pressure, debounce configuration, firmware state, or USB signal quality. A gaming mouse may have configurable debounce behavior, while a trackpad and touch screen send different input patterns. Use a physical mouse for the most relevant test, keep your browser tab active, and treat the result as evidence to compare—not a repair verdict.</p>
+    <p>For a broader starting point, the <a href="/mouse-test">mouse button and movement test</a> checks eight common inputs. For scroll-related symptoms, use the <a href="/">scroll wheel test</a>. Together, these focused checks help you describe a repeatable issue before changing settings, seeking warranty support, or replacing a device.</p>
+
+    <RelatedTools current="double" />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>
