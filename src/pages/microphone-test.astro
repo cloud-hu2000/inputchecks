@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import MicrophoneTool from '../components/MicrophoneTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Test your microphone online with a live input meter and private playback sample. Check device selection, permission, signal level, and browser audio capture.';
+const faq = [
+  { question: 'Is my microphone recording uploaded?', answer: 'No. The live meter and optional sample are processed in this browser tab. The sample remains a local playback object and is cleared when you reload or close the page.' },
+  { question: 'Why does the input meter stay flat?', answer: 'Check browser and operating-system permission, the selected input device, hardware mute, connection, and input gain. Compare another app or browser before concluding that the microphone has failed.' },
+  { question: 'Does a moving meter mean other people can hear me clearly?', answer: 'No. It shows that this tab receives audio. A local playback sample helps you assess sound, but a call app can use different devices, processing, and network settings.' },
+];
+const related = [
+  { href: '/controller-test', title: 'Controller Test', description: 'Check a connected gamepad in the browser.', icon: '◈' },
+  { href: '/keyboard-test', title: 'Keyboard Test', description: 'Check another input device.', icon: '⌨' },
+  { href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons, wheel, and movement.', icon: '◉' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Microphone Test', url: absoluteUrl('/microphone-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Microphone Test – Check Audio Input" {description} path="/microphone-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Microphone Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Microphone Test</h1>
+    <p>Check whether your browser receives microphone audio, then listen to a short private sample.</p>
+  </section>
+  <MicrophoneTool />
+  <article class="content">
+    <h2>How to run this microphone test</h2>
+    <p>Select Start microphone test and allow microphone access when your browser asks. Speak at your normal volume while watching the live input meter. If more than one input device is available, choose the microphone you actually intend to use. Try quiet speech, a normal sentence, and one louder sentence without touching the microphone. The meter shows whether this tab is receiving a changing signal. When you are finished, select Stop microphone; the page also stops capture when the tab is hidden.</p>
+    <p>For a sound check, record a sample of up to 15 seconds and play it back in this tab. Include a short pause and a sentence with different consonants so you can hear whether speech is clear and whether background noise is present. The sample is made for local playback and is not uploaded by this tool. Reloading or closing the page clears it. Use headphones for playback if open speakers would feed back into a still-active microphone.</p>
+
+    <h2>What the microphone level means</h2>
+    <p>The live meter is based on the root-mean-square level of the audio samples delivered by the browser. It is shown in dBFS, where 0 dBFS is the maximum digital level and quieter signals are negative numbers. A reading near -60 dBFS is much quieter than one near -20 dBFS. The session peak records the highest value seen while the test is active. The meter is for comparison within this test; it is not a calibrated sound-pressure-level meter and cannot tell you the loudness of your room in decibels SPL.</p>
+    <p>The “Input detected” state uses a simple signal threshold. A very low reading can mean silence, a distant microphone, low gain, the wrong selected input, or a mute setting. It is not a pass-or-fail judgment. Likewise, a moving meter does not guarantee clear audio. Listen to the sample for hiss, hum, muffled words, clipping, dropouts, or strong automatic processing. Repeat the same phrase after changing only one setting at a time.</p>
+
+    <h2>Choose the right microphone</h2>
+    <p>Browsers often hide full device labels until permission is granted. After access is allowed, the input menu lists microphones that the browser exposes. A laptop may have a built-in microphone, a headset microphone, a USB interface, and a virtual audio input at the same time. Select the device you plan to use in your call or recording software, then say a few words to confirm that the meter responds. Switching devices can prompt another permission check or briefly stop the old stream.</p>
+    <p>If two microphones have similar names, unplug one device and watch which entry disappears, or check the operating system's sound settings. An HDMI display or Bluetooth headset can change the default input when it connects. A successful test on one device does not prove the application where you noticed a problem is using that same device. Match the selected device name in both places before changing drivers or hardware.</p>
+
+    <h2>Microphone permissions and privacy</h2>
+    <p>The <a href="https://www.w3.org/TR/mediacapture-streams/" rel="noopener noreferrer">W3C Media Capture and Streams specification</a> describes the browser permission and media-stream model behind this test. The page requests audio only after you select Start microphone test. Browsers generally require a secure page for microphone access. The resulting stream is analyzed locally for the meter and, only when you choose Record, used to build a short playback sample. The tool does not ask for camera access and does not send microphone data to a server.</p>
+    <p>You can stop capture with the Stop microphone button. Capture also ends when this tab is hidden or closed. The browser's own permission indicator may remain visible while another site or application is using the microphone; that indicator is broader than this page. If you denied permission earlier, change the permission in your browser's site controls and try again. The exact location of that control depends on the browser and operating system.</p>
+
+    <h2>Why a microphone may seem silent</h2>
+    <p>Start with the selected input, hardware mute switch, cable or wireless connection, and the operating system's input level. Some headsets expose separate hands-free and high-quality modes; one may be selected unexpectedly. Close another application that may be holding an exclusive audio device, then repeat the test. If the browser reports that no microphone was found, reconnect the device and confirm that the operating system lists it. Test another browser to distinguish a browser permission problem from a wider connection issue.</p>
+    <p>If the meter moves but playback is quiet, check system volume and the output device you are listening through. Playback depends on speakers or headphones as well as the microphone recording. If the sample sounds clear here but a conferencing app sounds bad, inspect that app's own microphone selection, mute state, noise suppression, network connection, and test-call feature. This local page cannot measure what a remote participant receives after an application's codec and network processing.</p>
+
+    <h2>Use a repeatable audio comparison</h2>
+    <p>Keep your mouth the same distance from the microphone and use the same sentence in each recording. Change one setting at a time: device, gain, placement, or processing. Speak normally before testing loud speech; chasing the highest possible meter reading can produce distortion. If a sample clips or pumps, lower the input level or move slightly farther away and repeat. If noise dominates while you are silent, compare a quieter room or a different microphone position before assuming the device is defective.</p>
+    <p>The microphone test complements other browser input checks, such as the <a href="/controller-test">Controller Test</a>, <a href="/keyboard-test">Keyboard Test</a>, and <a href="/mouse-test">Mouse Test</a>. Each page reports only what its own browser API receives. A repeatable symptom across applications and devices is stronger evidence than one unusual reading from one tab.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

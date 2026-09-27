@@ -1,0 +1,116 @@
+<section class="tester spacebar-speed-tester" data-spacebar-speed>
+  <button class="spacebar-speed-zone" type="button" data-tap-zone aria-label="Focus the spacebar clicker and press Space">
+    <strong data-zone-message>Click here, then press Space</strong>
+    <small>The first press starts the timed round. Release the key between presses.</small>
+  </button>
+  <div class="spacebar-speed-options" role="group" aria-label="Round duration">
+    <span>Round length</span>
+    <button type="button" data-duration="5" aria-pressed="true">5 seconds</button>
+    <button type="button" data-duration="10" aria-pressed="false">10 seconds</button>
+    <button type="button" data-duration="30" aria-pressed="false">30 seconds</button>
+  </div>
+  <div class="spacebar-speed-metrics" aria-label="Spacebar speed results">
+    <div><span>Presses</span><strong data-presses>0</strong></div>
+    <div><span>Time left</span><strong data-time>5.0 s</strong></div>
+    <div><span>Current CPS</span><strong data-current>0.0</strong></div>
+    <div><span>Peak 1-second CPS</span><strong data-peak>0</strong></div>
+    <div><span>Final CPS</span><strong data-final>—</strong></div>
+  </div>
+  <p class="result-note collecting" data-status role="status" aria-live="polite">Focus the test area and press Space to begin.</p>
+  <button class="button text-button" type="button" data-reset>Reset round</button>
+</section>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-spacebar-speed]');
+  if (root) {
+    const zone = root.querySelector<HTMLButtonElement>('[data-tap-zone]')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const options = [...root.querySelectorAll<HTMLButtonElement>('[data-duration]')];
+    let duration = 5;
+    let presses = 0;
+    let startedAt = 0;
+    let peak = 0;
+    let held = false;
+    let state: 'ready' | 'running' | 'finished' = 'ready';
+    let timer = 0;
+    let pressTimes: number[] = [];
+    const set = (key: string, value: string) => { root.querySelector<HTMLElement>(`[data-${key}]`)!.textContent = value; };
+    const tick = () => {
+      if (state !== 'running') return;
+      const elapsed = performance.now() - startedAt;
+      if (elapsed >= duration * 1000) { finish(); return; }
+      set('time', `${((duration * 1000 - elapsed) / 1000).toFixed(1)} s`);
+      set('current', (presses / Math.max(0.1, elapsed / 1000)).toFixed(1));
+    };
+    const finish = (interrupted = false) => {
+      if (state !== 'running') return;
+      state = 'finished';
+      window.clearInterval(timer);
+      options.forEach((option) => { option.disabled = false; });
+      set('time', '0.0 s');
+      set('current', interrupted ? '—' : (presses / duration).toFixed(1));
+      set('final', interrupted ? '—' : (presses / duration).toFixed(1));
+      set('zone-message', 'Round complete — reset to try again');
+      status.className = `result-note ${interrupted ? 'collecting' : 'success'}`;
+      status.textContent = interrupted
+        ? `The tab lost focus after ${presses} presses. Reset and keep the tab visible for a comparable round.`
+        : `${presses} separate Space presses in ${duration} seconds: ${(presses / duration).toFixed(1)} CPS. Compare several rounds under the same conditions.`;
+    };
+    const reset = () => {
+      window.clearInterval(timer);
+      presses = 0; startedAt = 0; peak = 0; held = false; pressTimes = []; state = 'ready';
+      options.forEach((option) => { option.disabled = false; });
+      set('presses', '0'); set('time', `${duration.toFixed(1)} s`); set('current', '0.0'); set('peak', '0'); set('final', '—');
+      set('zone-message', 'Click here, then press Space');
+      status.className = 'result-note collecting';
+      status.textContent = 'Focus the test area and press Space to begin.';
+    };
+    zone.addEventListener('keydown', (event) => {
+      if (event.code !== 'Space') return;
+      event.preventDefault();
+      if (event.repeat || held || state === 'finished') return;
+      held = true;
+      const now = performance.now();
+      if (state === 'ready') {
+        state = 'running'; startedAt = now;
+        options.forEach((option) => { option.disabled = true; });
+        set('zone-message', 'Keep pressing Space');
+        status.textContent = 'Round in progress. Release Space between presses.';
+        timer = window.setInterval(tick, 50);
+      }
+      if (now - startedAt >= duration * 1000) { finish(); return; }
+      presses++;
+      pressTimes.push(now);
+      pressTimes = pressTimes.filter((time) => time > now - 1000);
+      peak = Math.max(peak, pressTimes.length);
+      set('presses', String(presses)); set('peak', String(peak));
+      zone.classList.add('active');
+    });
+    zone.addEventListener('keyup', (event) => { if (event.code === 'Space') { event.preventDefault(); held = false; zone.classList.remove('active'); } });
+    zone.addEventListener('blur', () => { held = false; zone.classList.remove('active'); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) finish(true); });
+    options.forEach((button) => button.addEventListener('click', () => {
+      if (state === 'running') return;
+      duration = Number(button.dataset.duration);
+      options.forEach((option) => option.setAttribute('aria-pressed', String(option === button)));
+      reset();
+    }));
+    root.querySelector('[data-reset]')!.addEventListener('click', () => { reset(); zone.focus(); });
+  }
+</script>
+<style>
+  .spacebar-speed-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;width:100%;min-height:240px;border:2px dashed #b8cecd;border-radius:12px;background:var(--canvas);color:var(--accent-dark);text-align:center;padding:20px}
+  .spacebar-speed-zone:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+  .spacebar-speed-zone.active{background:#dff5eb;border-color:var(--success)}
+  .spacebar-speed-zone strong{font-size:1.35rem}
+  .spacebar-speed-zone small{color:var(--muted)}
+  .spacebar-speed-options{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px}
+  .spacebar-speed-options span{font-weight:700;margin-right:5px}
+  .spacebar-speed-options button{padding:7px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  .spacebar-speed-options button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .spacebar-speed-options button:disabled{opacity:.6;cursor:not-allowed}
+  .spacebar-speed-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:18px}
+  .spacebar-speed-metrics>div{border:1px solid var(--line);border-radius:9px;padding:11px;min-width:0}
+  .spacebar-speed-metrics span{display:block;color:var(--muted);font-size:.77rem}
+  .spacebar-speed-metrics strong{display:block;font-size:1.15rem;margin-top:3px}
+  @media(max-width:760px){.spacebar-speed-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.spacebar-speed-zone{min-height:220px}}
+</style>

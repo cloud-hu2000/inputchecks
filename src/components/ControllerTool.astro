@@ -1,0 +1,153 @@
+<section class="tester controller-tester" data-controller-tester>
+  <button class="button primary" type="button" data-controller-start>Start controller test</button>
+  <div class="controller-controls">
+    <label for="controller-choice">Connected controller</label>
+    <select id="controller-choice" data-controller-choice disabled><option value="">No controller detected</option></select>
+    <button class="button text-button" type="button" data-controller-stop disabled>Stop test</button>
+  </div>
+  <p class="result-note collecting" data-controller-status role="status" aria-live="polite">Connect a controller, then select Start controller test and press any controller button.</p>
+  <dl class="controller-summary">
+    <div><dt>Browser mapping</dt><dd data-controller-mapping>—</dd></div>
+    <div><dt>Buttons</dt><dd data-controller-buttons-count>0</dd></div>
+    <div><dt>Axes</dt><dd data-controller-axes-count>0</dd></div>
+    <div><dt>Active buttons</dt><dd data-controller-active>0</dd></div>
+  </dl>
+  <div class="controller-output" data-controller-output hidden>
+    <div><h2>Button input</h2><div class="controller-grid" data-controller-buttons></div></div>
+    <div><h2>Stick and axis input</h2><div class="controller-axes" data-controller-axes></div></div>
+  </div>
+  <p class="callout">The browser reports logical button indexes and normalized axis values. Physical labels and ordering can differ by controller and driver.</p>
+</section>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-controller-tester]');
+  if (root) {
+    const startButton = root.querySelector<HTMLButtonElement>('[data-controller-start]')!;
+    const stopButton = root.querySelector<HTMLButtonElement>('[data-controller-stop]')!;
+    const choice = root.querySelector<HTMLSelectElement>('[data-controller-choice]')!;
+    const status = root.querySelector<HTMLElement>('[data-controller-status]')!;
+    const output = root.querySelector<HTMLElement>('[data-controller-output]')!;
+    const buttonsBox = root.querySelector<HTMLElement>('[data-controller-buttons]')!;
+    const axesBox = root.querySelector<HTMLElement>('[data-controller-axes]')!;
+    let scanning = false;
+    let frame = 0;
+    let deviceSignature = '';
+    let controlSignature = '';
+    let buttonValues: HTMLElement[] = [];
+    let axisValues: HTMLElement[] = [];
+    let axisMeters: HTMLMeterElement[] = [];
+    let lastStatus = '';
+    const set = (key: string, value: string) => { root.querySelector<HTMLElement>(`[data-controller-${key}]`)!.textContent = value; };
+    const message = (kind: string, text: string) => {
+      if (lastStatus === text) return;
+      lastStatus = text; status.className = `result-note ${kind}`; status.textContent = text;
+    };
+    const readDevices = (): Gamepad[] => {
+      try { return [...navigator.getGamepads()].filter((pad): pad is Gamepad => pad !== null && pad.connected); }
+      catch { message('warning', 'The browser could not read connected controllers. Check browser permissions or try another browser.'); return []; }
+    };
+    const rebuildControls = (pad: Gamepad) => {
+      const signature = `${pad.index}:${pad.buttons.length}:${pad.axes.length}:${pad.mapping}`;
+      if (signature === controlSignature) return;
+      controlSignature = signature;
+      buttonsBox.replaceChildren(); axesBox.replaceChildren();
+      buttonValues = []; axisValues = []; axisMeters = [];
+      const standardNames = ['Bottom face', 'Right face', 'Left face', 'Top face', 'Left shoulder', 'Right shoulder', 'Left trigger', 'Right trigger', 'Select', 'Start', 'Left stick press', 'Right stick press', 'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'Home'];
+      pad.buttons.forEach((_, index) => {
+        const card = document.createElement('div'); card.className = 'controller-button';
+        const name = document.createElement('span');
+        name.textContent = pad.mapping === 'standard' && standardNames[index] ? `Button ${index}: ${standardNames[index]}` : `Button ${index}`;
+        const value = document.createElement('strong'); value.textContent = '0.00';
+        card.append(name, value); buttonsBox.append(card); buttonValues.push(value);
+      });
+      pad.axes.forEach((_, index) => {
+        const row = document.createElement('div'); row.className = 'controller-axis';
+        const name = document.createElement('span'); name.textContent = `Axis ${index}`;
+        const meter = document.createElement('meter'); meter.min = -1; meter.max = 1; meter.value = 0; meter.setAttribute('aria-label', `Axis ${index} position`);
+        const value = document.createElement('strong'); value.textContent = '0.00';
+        row.append(name, meter, value); axesBox.append(row); axisMeters.push(meter); axisValues.push(value);
+      });
+      set('mapping', pad.mapping || 'Device-specific');
+      set('buttons-count', String(pad.buttons.length)); set('axes-count', String(pad.axes.length));
+    };
+    const poll = () => {
+      if (!scanning) return;
+      const devices = readDevices();
+      const nextSignature = devices.map((pad) => `${pad.index}:${pad.id}`).join('|');
+      if (nextSignature !== deviceSignature) {
+        deviceSignature = nextSignature;
+        const selected = choice.value;
+        choice.replaceChildren();
+        if (!devices.length) {
+          const option = document.createElement('option'); option.value = ''; option.textContent = 'No controller detected'; choice.append(option);
+          choice.disabled = true;
+        } else {
+          devices.forEach((pad) => { const option = document.createElement('option'); option.value = String(pad.index); option.textContent = `${pad.id} (index ${pad.index})`; choice.append(option); });
+          choice.disabled = false;
+          choice.value = devices.some((pad) => String(pad.index) === selected) ? selected : String(devices[0].index);
+        }
+        controlSignature = '';
+      }
+      const pad = devices.find((device) => String(device.index) === choice.value);
+      if (!pad) {
+        output.hidden = true;
+        set('mapping', '—'); set('buttons-count', '0'); set('axes-count', '0'); set('active', '0');
+        message('collecting', 'Waiting for a controller. Connect it, keep this tab visible, and press a controller button.');
+      } else {
+        output.hidden = false;
+        rebuildControls(pad);
+        let active = 0;
+        pad.buttons.forEach((button, index) => {
+          const value = Number.isFinite(button.value) ? button.value : 0;
+          const pressed = button.pressed || value > 0.5;
+          if (pressed) active++;
+          buttonValues[index].textContent = value.toFixed(2);
+          buttonValues[index].parentElement!.classList.toggle('active', pressed);
+        });
+        pad.axes.forEach((axis, index) => {
+          const value = Number.isFinite(axis) ? Math.max(-1, Math.min(1, axis)) : 0;
+          axisValues[index].textContent = value.toFixed(2);
+          axisMeters[index].value = value;
+        });
+        set('active', String(active));
+        message('success', `${pad.id} is connected. Press each button and move each stick to compare the live values.`);
+      }
+      frame = requestAnimationFrame(poll);
+    };
+    startButton.addEventListener('click', () => {
+      if (!navigator.getGamepads) { message('warning', 'This browser does not expose the Gamepad API. Try a current desktop browser.'); return; }
+      if (scanning) return;
+      scanning = true; startButton.disabled = true; stopButton.disabled = false;
+      message('collecting', 'Looking for controllers. Press a controller button if the device does not appear yet.');
+      poll();
+    });
+    stopButton.addEventListener('click', () => {
+      scanning = false; cancelAnimationFrame(frame); startButton.disabled = false; stopButton.disabled = true;
+      message('collecting', 'Controller test stopped. Select Start controller test to check again.');
+    });
+    choice.addEventListener('change', () => { controlSignature = ''; });
+    window.addEventListener('gamepadconnected', () => { if (scanning) deviceSignature = ''; });
+    window.addEventListener('gamepaddisconnected', () => { if (scanning) deviceSignature = ''; });
+  }
+</script>
+<style>
+  .controller-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .controller-controls label{font-weight:700}
+  .controller-controls select{max-width:min(100%,440px);padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  .controller-controls .text-button{margin:0;padding:9px}
+  .controller-tester button:disabled{opacity:.52;cursor:not-allowed}
+  .controller-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0}
+  .controller-summary>div{border:1px solid var(--line);border-radius:9px;padding:10px;min-width:0}
+  .controller-summary dt{color:var(--muted);font-size:.78rem}
+  .controller-summary dd{font-weight:750;margin:3px 0 0;overflow-wrap:anywhere}
+  .controller-output{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .controller-output[hidden]{display:none}
+  .controller-output h2{font-size:1.12rem;margin:4px 0 10px}
+  .controller-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .controller-button{border:1px solid var(--line);border-radius:8px;padding:9px;display:flex;justify-content:space-between;gap:8px;font-size:.82rem}
+  .controller-button strong{white-space:nowrap}
+  .controller-button.active{background:var(--soft-success);border-color:#a9dbc3}
+  .controller-axis{display:grid;grid-template-columns:60px 1fr 40px;gap:8px;align-items:center;margin:10px 0;font-size:.83rem}
+  .controller-axis meter{width:100%}
+  .controller-tester .callout{margin-top:22px}
+  @media(max-width:760px){.controller-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.controller-output{grid-template-columns:1fr}.controller-grid{grid-template-columns:1fr}}
+</style>

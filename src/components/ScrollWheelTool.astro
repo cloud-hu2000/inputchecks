@@ -1,2 +1,71 @@
-<section class="tester scroll-tester" data-scroll-tester><div class="wheel-area" data-wheel-area tabindex="0" role="application" aria-label="Scroll wheel test area"><span class="wheel-area-status" data-chosen-direction>Scroll to begin</span><strong>Scroll inside this area</strong><small>Your first scroll sets the direction for this test.</small></div><div class="metrics" aria-live="polite"><div><span>Total Events</span><strong data-total>0</strong></div><div><span>Matching</span><strong data-expected>0</strong></div><div><span>Reverse Events</span><strong data-reverse>0</strong></div><div><span>Reverse Rate</span><strong data-rate>0.00%</strong></div><div><span>Longest Gap</span><strong data-gap>0 ms</strong></div><div><span>Event Rate</span><strong data-event-rate>0 events/sec</strong></div></div><figure class="signal"><figcaption>Scroll Signal <span>Green = first scroll direction · Red = reverse</span></figcaption><canvas aria-label="Live graph of mouse scroll input"></canvas></figure><div class="result-note collecting" data-result aria-live="polite"><strong>Ready when you are</strong><span>Scroll inside the test area to begin.</span></div><button class="button text-button" data-reset>Reset test</button></section>
+<section class="tester scroll-tester" data-scroll-tester>
+  <div class="wheel-duration" role="group" aria-label="Test duration">
+    <span>Test duration</span>
+    <button type="button" data-duration="15" aria-pressed="true">15 seconds</button>
+    <button type="button" data-duration="30" aria-pressed="false">30 seconds</button>
+    <button type="button" data-duration="60" aria-pressed="false">60 seconds</button>
+  </div>
+  <div class="wheel-area" data-wheel-area tabindex="0" role="region" aria-label="Scroll wheel test area">
+    <span class="wheel-area-status" data-chosen-direction>Ready for a 15-second test</span>
+    <strong>Scroll inside this area to begin</strong>
+    <small>Keep scrolling in one direction. The first vertical event sets the expected direction.</small>
+  </div>
+  <div class="wheel-actions">
+    <button class="button secondary" type="button" data-finish disabled>Finish and review</button>
+    <button class="button text-button" type="button" data-reset>Reset test</button>
+    <span data-time-left aria-live="off">15 seconds remaining</span>
+  </div>
+  <div class="wheel-metrics" aria-label="Live scroll test metrics">
+    <div><span>Vertical events</span><strong data-total>0</strong></div>
+    <div><span>Matching</span><strong data-expected>0</strong></div>
+    <div><span>Reverse events</span><strong data-reverse>0</strong></div>
+    <div><span>Reverse rate</span><strong data-rate>0.00%</strong></div>
+    <div><span>Wheel events / sec</span><strong data-event-rate>0</strong></div>
+    <div><span>Longest event gap</span><strong data-gap>0 ms</strong></div>
+    <div><span>Last DeltaY</span><strong data-last-y>0</strong></div>
+    <div><span>Last DeltaX</span><strong data-last-x>0</strong></div>
+    <div><span>Delta mode</span><strong data-mode>—</strong></div>
+    <div><span>Horizontal events</span><strong data-horizontal>0</strong></div>
+  </div>
+  <figure class="signal"><figcaption>Scroll signal <span>Green = first direction · Red = opposite direction</span></figcaption><canvas aria-label="Live graph of vertical wheel input"></canvas></figure>
+  <div class="result-note collecting" data-result role="status" aria-live="polite"><strong>Ready when you are</strong><span>Choose a duration, then scroll inside the test area.</span></div>
+  <section class="wheel-report" data-report hidden aria-labelledby="wheel-report-title">
+    <strong class="wheel-report-title" id="wheel-report-title">Your scroll wheel test report</strong>
+    <p data-report-summary></p>
+    <dl class="wheel-report-facts">
+      <div><dt>Direction tested</dt><dd data-report-direction>—</dd></div>
+      <div><dt>Vertical events</dt><dd data-report-events>0</dd></div>
+      <div><dt>Horizontal events</dt><dd data-report-horizontal>0</dd></div>
+      <div><dt>Largest absolute DeltaY</dt><dd data-report-peak>0</dd></div>
+    </dl>
+    <strong class="wheel-report-subtitle">Recent vertical events</strong>
+    <p>Use the last ten recorded events to check where a reversal appeared. Delta values are browser units, which may be pixels, lines, or pages.</p>
+    <div class="wheel-table-wrap"><table><thead><tr><th scope="col">Time</th><th scope="col">DeltaY</th><th scope="col">Direction</th><th scope="col">Compared with first event</th></tr></thead><tbody data-report-rows></tbody></table></div>
+  </section>
+</section>
 <script src="../tools/scroll-wheel/ScrollWheelTester.ts"></script>
+<style>
+  .wheel-duration,.wheel-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .wheel-duration>span{font-weight:700;margin-right:4px}
+  .wheel-duration button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:7px 11px;font-size:.9rem}
+  .wheel-duration button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .wheel-actions{margin:14px 0 0}
+  .wheel-actions .text-button{margin:0;padding:10px}
+  .wheel-actions button:disabled{opacity:.48;cursor:not-allowed}
+  .wheel-actions span{margin-left:auto;color:var(--muted);font-size:.88rem}
+  .wheel-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:18px 0}
+  .wheel-metrics>div,.wheel-report-facts>div{border:1px solid var(--line);border-radius:9px;padding:10px 12px;min-width:0}
+  .wheel-metrics span,.wheel-report-facts dt{display:block;color:var(--muted);font-size:.77rem}
+  .wheel-metrics strong,.wheel-report-facts dd{display:block;font-size:1.12rem;font-weight:750;margin:3px 0 0;overflow-wrap:anywhere}
+  .wheel-report{border-top:1px solid var(--line);margin-top:22px;padding-top:8px}
+  .wheel-report[hidden]{display:none}
+  .wheel-report-title{display:block;margin:10px 0 5px;font-size:1.42rem;letter-spacing:-.03em}
+  .wheel-report-subtitle{display:block;margin:22px 0 4px;font-size:1.05rem}
+  .wheel-report p{color:var(--muted);margin:6px 0 12px}
+  .wheel-report-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+  .wheel-table-wrap{overflow-x:auto}
+  .wheel-table-wrap table{width:100%;border-collapse:collapse;text-align:left;font-size:.87rem}
+  .wheel-table-wrap th,.wheel-table-wrap td{padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .wheel-table-wrap th{color:var(--muted);font-weight:700}
+  @media(max-width:760px){.wheel-metrics,.wheel-report-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.wheel-actions span{width:100%;margin-left:0}.wheel-area{padding:20px}}
+</style>

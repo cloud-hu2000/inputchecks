@@ -1,0 +1,11 @@
+---
+import ToolCard from './ToolCard.astro';
+
+interface TestLink { href: string; title: string; description: string; icon: string }
+const { tests } = Astro.props as { tests: TestLink[] };
+---
+
+<section class="related" aria-labelledby="new-related-heading">
+  <h2 id="new-related-heading">Related tests</h2>
+  <div class="tool-grid">{tests.map((test) => <ToolCard {...test} />)}</div>
+</section>

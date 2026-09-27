@@ -1,0 +1,201 @@
+<section class="tester microphone-tester" data-microphone-tester>
+  <div class="microphone-actions">
+    <button class="button primary" type="button" data-mic-start>Start microphone test</button>
+    <button class="button secondary" type="button" data-mic-stop disabled>Stop microphone</button>
+  </div>
+  <p class="result-note collecting" data-mic-status role="status" aria-live="polite">Select Start microphone test to request access and view a live input meter.</p>
+  <div class="microphone-device-row">
+    <label for="microphone-device">Input device</label>
+    <select id="microphone-device" data-mic-device disabled><option value="">Default microphone</option></select>
+  </div>
+  <div class="microphone-meter" aria-label="Live microphone level">
+    <span>Input level</span>
+    <progress data-mic-progress max="100" value="0">0%</progress>
+    <strong data-mic-db>— dBFS</strong>
+  </div>
+  <dl class="microphone-metrics">
+    <div><dt>Session peak</dt><dd data-mic-peak>— dBFS</dd></div>
+    <div><dt>Signal state</dt><dd data-mic-signal>Waiting</dd></div>
+    <div><dt>Selected device</dt><dd data-mic-name>—</dd></div>
+  </dl>
+  <div class="microphone-record">
+    <button class="button secondary" type="button" data-mic-record disabled>Record a 15-second sample</button>
+    <button class="button text-button" type="button" data-mic-record-stop disabled>Stop recording</button>
+    <span data-mic-record-time aria-live="off"></span>
+  </div>
+  <audio controls data-mic-playback hidden aria-label="Play your local microphone sample"></audio>
+  <p class="callout">Audio is analyzed in this tab. A sample is kept locally for playback and is cleared when you close or reload the page.</p>
+</section>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-microphone-tester]');
+  if (root) {
+    const startButton = root.querySelector<HTMLButtonElement>('[data-mic-start]')!;
+    const stopButton = root.querySelector<HTMLButtonElement>('[data-mic-stop]')!;
+    const recordButton = root.querySelector<HTMLButtonElement>('[data-mic-record]')!;
+    const recordStopButton = root.querySelector<HTMLButtonElement>('[data-mic-record-stop]')!;
+    const deviceSelect = root.querySelector<HTMLSelectElement>('[data-mic-device]')!;
+    const status = root.querySelector<HTMLElement>('[data-mic-status]')!;
+    const playback = root.querySelector<HTMLAudioElement>('[data-mic-playback]')!;
+    const level = root.querySelector<HTMLProgressElement>('[data-mic-progress]')!;
+    let stream: MediaStream | null = null;
+    let context: AudioContext | null = null;
+    let analyser: AnalyserNode | null = null;
+    let frame = 0;
+    let peak = -100;
+    let recording: MediaRecorder | null = null;
+    let recordTimer = 0;
+    let recordStarted = 0;
+    let playbackUrl = '';
+    let requestId = 0;
+    const set = (key: string, value: string) => { root.querySelector<HTMLElement>(`[data-mic-${key}]`)!.textContent = value; };
+    const message = (kind: string, text: string) => { status.className = `result-note ${kind}`; status.textContent = text; };
+    const clearPlayback = () => {
+      playback.pause(); playback.removeAttribute('src'); playback.load(); playback.hidden = true;
+      if (playbackUrl) URL.revokeObjectURL(playbackUrl);
+      playbackUrl = '';
+    };
+    const endRecording = () => {
+      window.clearInterval(recordTimer);
+      if (recording?.state === 'recording') recording.stop();
+      recordStopButton.disabled = true;
+      recordButton.disabled = !stream || typeof MediaRecorder === 'undefined';
+      set('record-time', '');
+    };
+    const stop = (reason = 'Microphone stopped. Your latest sample remains available for local playback.') => {
+      requestId++;
+      endRecording();
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      stream?.getTracks().forEach((track) => track.stop());
+      stream = null; analyser = null;
+      if (context) void context.close();
+      context = null;
+      startButton.disabled = false; stopButton.disabled = true; recordButton.disabled = true; deviceSelect.disabled = true;
+      level.value = 0;
+      set('db', '— dBFS'); set('signal', 'Stopped');
+      message('collecting', reason);
+    };
+    const draw = () => {
+      if (!analyser || !stream) return;
+      const data = new Float32Array(analyser.fftSize);
+      analyser.getFloatTimeDomainData(data);
+      let sum = 0;
+      for (const value of data) sum += value * value;
+      const rms = Math.sqrt(sum / data.length);
+      const db = Math.max(-100, 20 * Math.log10(Math.max(rms, 0.00001)));
+      peak = Math.max(peak, db);
+      level.value = Math.min(100, Math.max(0, db + 100));
+      set('db', `${db.toFixed(1)} dBFS`);
+      set('peak', `${peak.toFixed(1)} dBFS`);
+      set('signal', db > -50 ? 'Input detected' : 'Very low input');
+      frame = requestAnimationFrame(draw);
+    };
+    const listDevices = async (selectedId: string) => {
+      try {
+        const inputs = (await navigator.mediaDevices.enumerateDevices()).filter((device) => device.kind === 'audioinput');
+        deviceSelect.replaceChildren();
+        for (const [index, device] of inputs.entries()) {
+          const option = document.createElement('option');
+          option.value = device.deviceId; option.textContent = device.label || `Microphone ${index + 1}`;
+          deviceSelect.append(option);
+        }
+        if (inputs.some((device) => device.deviceId === selectedId)) deviceSelect.value = selectedId;
+        deviceSelect.disabled = inputs.length < 2;
+      } catch { deviceSelect.disabled = true; }
+    };
+    const start = async (deviceId = '') => {
+      if (!navigator.mediaDevices?.getUserMedia) { message('warning', 'Microphone access is unavailable. Use a supported browser on a secure page.'); return; }
+      if (stream) stop('Switching microphone…');
+      const currentRequest = ++requestId;
+      let nextStream: MediaStream | null = null;
+      let nextContext: AudioContext | null = null;
+      startButton.disabled = true;
+      message('collecting', 'Requesting microphone access. Choose an input device when the browser asks.');
+      try {
+        nextContext = new AudioContext();
+        void nextContext.resume().catch(() => undefined);
+        nextStream = await navigator.mediaDevices.getUserMedia({ audio: deviceId ? { deviceId: { exact: deviceId } } : true });
+        if (currentRequest !== requestId) { nextStream.getTracks().forEach((track) => track.stop()); return; }
+        const source = nextContext.createMediaStreamSource(nextStream);
+        const nextAnalyser = nextContext.createAnalyser();
+        nextAnalyser.fftSize = 2048;
+        source.connect(nextAnalyser);
+        stream = nextStream; context = nextContext; analyser = nextAnalyser; peak = -100;
+        const track = nextStream.getAudioTracks()[0];
+        set('name', track?.label || 'Browser default microphone');
+        set('peak', '— dBFS');
+        startButton.disabled = true; stopButton.disabled = false;
+        recordButton.disabled = typeof MediaRecorder === 'undefined';
+        void listDevices(track?.getSettings().deviceId || deviceId);
+        message('success', 'Microphone is active. Speak normally and watch the live meter, or record a short private sample.');
+        draw();
+        track?.addEventListener('ended', () => { if (stream === nextStream) stop('The microphone disconnected or access ended. Reconnect it and start again.'); });
+      } catch (error) {
+        nextStream?.getTracks().forEach((track) => track.stop());
+        if (nextContext) void nextContext.close();
+        startButton.disabled = false;
+        const name = error instanceof DOMException ? error.name : '';
+        const detail = name === 'NotAllowedError' ? 'Microphone permission was denied. Allow access in your browser settings and try again.'
+          : name === 'NotFoundError' ? 'No microphone was found. Connect or enable an input device and try again.'
+          : name === 'NotReadableError' ? 'The microphone is unavailable, possibly because another application is using it.'
+          : 'The microphone could not start. Check the connection and browser permissions, then try again.';
+        message('warning', detail);
+      }
+    };
+    startButton.addEventListener('click', () => { void start(); });
+    root.addEventListener('pointerdown', () => { if (context?.state === 'suspended') void context.resume().catch(() => undefined); });
+    stopButton.addEventListener('click', () => stop());
+    deviceSelect.addEventListener('change', () => { if (stream) void start(deviceSelect.value); });
+    recordButton.addEventListener('click', () => {
+      if (!stream || typeof MediaRecorder === 'undefined') return;
+      clearPlayback();
+      const chunks: BlobPart[] = [];
+      try {
+        const recorder = new MediaRecorder(stream);
+        recording = recorder;
+        recorder.addEventListener('dataavailable', (event) => { if (event.data.size) chunks.push(event.data); });
+        recorder.addEventListener('stop', () => {
+          if (!chunks.length) { message('warning', 'No audio sample was captured. Try recording again.'); return; }
+          const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+          playbackUrl = URL.createObjectURL(blob);
+          playback.src = playbackUrl; playback.hidden = false;
+          message('success', 'Sample ready. Play it back locally to check how your microphone sounds.');
+        });
+        recorder.start();
+        recordStarted = performance.now();
+        recordButton.disabled = true; recordStopButton.disabled = false;
+        set('record-time', 'Recording: 0.0 / 15.0 s');
+        recordTimer = window.setInterval(() => {
+          const elapsed = Math.min(15, (performance.now() - recordStarted) / 1000);
+          set('record-time', `Recording: ${elapsed.toFixed(1)} / 15.0 s`);
+          if (elapsed >= 15) endRecording();
+        }, 100);
+      } catch { message('warning', 'This browser could not create a recording. The live input meter is still available.'); }
+    });
+    recordStopButton.addEventListener('click', endRecording);
+    document.addEventListener('visibilitychange', () => { if (document.hidden && stream) stop('Microphone stopped when the tab was hidden. Start again when you return.'); });
+    window.addEventListener('pagehide', () => { if (stream) stop(); clearPlayback(); });
+  }
+</script>
+<style>
+  .microphone-actions,.microphone-device-row,.microphone-record{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .microphone-actions button:disabled,.microphone-record button:disabled{opacity:.52;cursor:not-allowed}
+  .microphone-device-row{margin:20px 0}
+  .microphone-device-row label{font-weight:700}
+  .microphone-device-row select{max-width:min(100%,440px);padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  .microphone-meter{display:grid;grid-template-columns:100px 1fr 95px;align-items:center;gap:12px;border:1px solid var(--line);border-radius:10px;padding:14px}
+  .microphone-meter span{font-weight:700}
+  .microphone-meter progress{width:100%;height:20px;accent-color:var(--accent)}
+  .microphone-meter strong{text-align:right}
+  .microphone-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}
+  .microphone-metrics>div{border:1px solid var(--line);border-radius:9px;padding:11px;min-width:0}
+  .microphone-metrics dt{color:var(--muted);font-size:.78rem}
+  .microphone-metrics dd{font-weight:750;margin:3px 0 0;overflow-wrap:anywhere}
+  .microphone-record{margin:20px 0 12px}
+  .microphone-record .text-button{margin:0;padding:10px}
+  .microphone-record span{color:var(--muted);font-size:.88rem}
+  .microphone-tester audio{display:block;width:min(100%,480px);margin:12px 0}
+  .microphone-tester audio[hidden]{display:none}
+  .microphone-tester .callout{margin-top:20px}
+  @media(max-width:760px){.microphone-meter{grid-template-columns:1fr}.microphone-meter strong{text-align:left}.microphone-metrics{grid-template-columns:1fr}}
+</style>

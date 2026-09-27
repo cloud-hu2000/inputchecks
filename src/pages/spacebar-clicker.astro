@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import SpacebarClickerTool from '../components/SpacebarClickerTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Measure spacebar CPS in a free 5, 10, or 30 second test. Count separate presses, see average and peak speed, and compare repeatable rounds in your browser.';
+const faq = [
+  { question: 'Does holding Space increase my CPS score?', answer: 'No. The clicker ignores browser key-repeat events. Release Space between presses so each deliberate press is counted once.' },
+  { question: 'Why does the page scroll instead of counting?', answer: 'Click the large test control to focus it, then press Space. If another element or tab has focus, the browser may use Space for page scrolling.' },
+  { question: 'Can I compare a 5-second score with a 30-second score?', answer: 'The formula is the same, but short bursts and longer sustained rounds test different pacing. Compare attempts made with the same duration and setup.' },
+];
+const related = [
+  { href: '/spacebar-test', title: 'Spacebar Test', description: 'Check whether separate Space presses register.', icon: '▁' },
+  { href: '/keyboard-test', title: 'Keyboard Test', description: 'Check individual keys and browser key codes.', icon: '⌨' },
+  { href: '/keyboard-ghosting-test', title: 'Keyboard Ghosting Test', description: 'Inspect keys held together.', icon: '▦' },
+  { href: '/cps-test', title: 'CPS Test', description: 'Compare mouse click speed.', icon: '⚡' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Spacebar Clicker', url: absoluteUrl('/spacebar-clicker'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Spacebar Clicker – Test Spacebar CPS" {description} path="/spacebar-clicker">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Spacebar Clicker' }]} />
+  <section class="page-hero shell compact">
+    <h1>Spacebar Clicker</h1>
+    <p>Count deliberate Space presses in a timed round and see your average and short-burst speed.</p>
+  </section>
+  <SpacebarClickerTool />
+  <article class="content">
+    <h2>How to use the Spacebar Clicker</h2>
+    <p>Click the large test control once so it has keyboard focus, select a 5, 10, or 30 second round, and press Space. The first press starts the clock and counts toward the result. Keep pressing and releasing until the timer reaches zero. The tool counts one keydown per deliberate press and ignores normal key-repeat events caused by holding the bar down. When the round ends, use Reset round before another attempt. The entire test runs in this browser tab and does not need an account or an installation.</p>
+    <p>If the page scrolls instead of the counter changing, return focus to the large control. A browser sends key events to the focused element, and Space is also a common page-scroll shortcut. The control prevents that default action while it is focused. On a laptop, confirm that the key itself is not being intercepted by a system shortcut, accessibility feature, or another application. A phone's on-screen keyboard is not a useful substitute for comparing a physical spacebar.</p>
+
+    <h2>What a spacebar CPS result measures</h2>
+    <p>CPS means clicks per second, although this page counts keyboard presses rather than mouse clicks. Final CPS equals the number of registered Space presses divided by the chosen round length. For example, 45 presses in a 10 second round produce 4.5 CPS. The current CPS value is an estimate while the clock is running; the final value uses the complete selected interval. Peak 1-second CPS shows the most presses seen in any recent one-second window during that round, which is a short burst rather than the sustained average.</p>
+    <p>A 5 second result is convenient for a quick attempt. A 30 second result says more about how consistently you can maintain a rhythm. Neither is inherently a better score, and a burst from a short round should not be compared directly with a longer sustained effort. Keep the same duration, keyboard, browser, and hand position when tracking your own progress. Try three rounds with rest between them, and compare a typical result rather than only your fastest attempt.</p>
+
+    <h2>Why the clicker ignores a held key</h2>
+    <p>Most keyboards generate repeated keydown events when a key stays pressed. Those automatic repeats depend on operating-system delay and repeat-rate settings, so treating them as fresh taps would reward a setting instead of actual press-and-release actions. This clicker ignores events flagged as repeat and waits for a release before accepting another press. The <a href="https://www.w3.org/TR/uievents-key/" rel="noopener noreferrer">W3C keyboard event values specification</a> documents the browser key values used to identify keys; the page listens for the physical-style Space code within its focused control.</p>
+    <p>This method is useful for a speed game, but it does not prove that every physical switch closure reached the operating system. A missed press can come from incomplete release, lack of focus, a keyboard connection issue, or the key itself. If you are investigating missed input rather than speed, use the separate <a href="/spacebar-test">Spacebar Test</a> to count slow, individual presses. Slow testing makes a fault easier to reproduce than rapid tapping.</p>
+
+    <h2>Get a repeatable spacebar speed sample</h2>
+    <p>Place the keyboard on a stable surface, choose a comfortable finger position, and keep the browser tab visible throughout the round. The test ends an interrupted round when the tab is hidden, because continuing a timer while another tab has focus would make the result hard to compare. Start with a few relaxed practice presses, then reset and complete the timed attempt. Avoid pressing so hard that you cannot release the key cleanly. Distinct releases matter more to this counter than force.</p>
+    <p>Short breaks help keep later results comparable. Fatigue can lower sustained speed, while anticipation can make the first second unusually fast. If you are comparing two keyboards, use the same duration and finger technique for each. A change from 4.0 to 4.5 CPS across one attempt does not by itself prove a keyboard is faster; test several rounds and look for a repeatable pattern. Stop if the motion becomes uncomfortable.</p>
+
+    <h2>When Space presses fail to register</h2>
+    <p>If the count stays at zero, click the test control and try one deliberate press. Check whether other keys work in the <a href="/keyboard-test">Keyboard Test</a>. If the spacebar is inconsistent only while other keys are held, check that exact combination with the <a href="/keyboard-ghosting-test">Keyboard Ghosting Test</a>. A keyboard layout, remapping tool, browser shortcut, or game overlay can change what reaches the page. Repeat a short sample in another browser before treating a low CPS score as a keyboard defect.</p>
+    <p>For an external keyboard, reconnect its cable or receiver, check battery charge, and try another computer if available. Test the center and each end of the long key slowly; those positions can feel different on a worn or loose stabilizer. The clicker cannot inspect a switch, keycap, firmware, or USB communication directly. If one area misses normal presses repeatedly across computers, record the pattern and follow the manufacturer's cleaning or support instructions.</p>
+
+    <h2>Spacebar clicking versus mouse clicking</h2>
+    <p>This page measures keyboard Space events. The <a href="/cps-test">CPS Test</a> measures mouse or trackpad click events over its own round. Even though both report a rate per second, the input devices and movement patterns are different. Use each score to compare like with like. A strong keyboard tapping score does not imply that a mouse button is reliable, and a low mouse CPS score does not mean the spacebar is slow. Choose the tool that matches the action you actually want to practice or troubleshoot.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

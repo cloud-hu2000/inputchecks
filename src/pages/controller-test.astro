@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import ControllerTool from '../components/ControllerTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Run a free controller test in your browser. Inspect gamepad buttons, triggers, and stick axes live, then compare the input with your games and device settings.';
+const faq = [
+  { question: 'Why is my controller not detected?', answer: 'Connect it to the operating system, start the test, and press a controller button. Some browsers expose a gamepad only after a physical input. Try another browser or a data-capable USB cable if it remains absent.' },
+  { question: 'Does a small nonzero stick value prove drift?', answer: 'No. Small center variations can be normal. Look for a sustained offset that affects a game, then compare another browser and the game or manufacturer calibration tool.' },
+  { question: 'Why do the button numbers differ from my controller labels?', answer: 'The browser reports logical indexes. Standard mapping describes positions, while nonstandard devices and drivers can use their own ordering.' },
+];
+const related = [
+  { href: '/keyboard-test', title: 'Keyboard Test', description: 'Compare another gaming input device.', icon: '⌨' },
+  { href: '/keyboard-ghosting-test', title: 'Keyboard Ghosting Test', description: 'Check simultaneous key combinations.', icon: '▦' },
+  { href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons and movement.', icon: '◉' },
+  { href: '/reaction-time-test', title: 'Reaction Time Test', description: 'Test visual response with a pointer.', icon: '◌' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Controller Test', url: absoluteUrl('/controller-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Controller Test – Check Gamepad Inputs" {description} path="/controller-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Controller Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Controller Test</h1>
+    <p>See the buttons and analog axes your browser receives from a connected gamepad.</p>
+  </section>
+  <ControllerTool />
+  <article class="content">
+    <h2>How to run this controller test</h2>
+    <p>Connect a gamepad through a data-capable USB cable or pair it with your operating system over a supported wireless connection. Select Start controller test, then press any face button or move a stick. Some browsers wait for a real controller action before showing the device to a page. Once the controller appears, press and release each button one at a time. Move every stick slowly through its full range, then let it return to center. Watch the live button values and axes while you make each physical action.</p>
+    <p>If several controllers are connected, choose the one you intend to test in the device menu. Stop test pauses the live display; starting again reads current browser input. The tool does not install a driver or change mappings. It reports what the browser sees in this tab, so use the same controller and connection mode when comparing attempts. If a device is not detected, verify that it works in the operating system before testing it in a webpage.</p>
+
+    <h2>Understand button and trigger readings</h2>
+    <p>Each button card shows a browser index and a value from zero toward one. A digital button generally jumps between released and pressed, while an analog trigger may change gradually as you squeeze it. The active-button count uses the browser's pressed state or a value above the midpoint. Check that the expected index changes when you press and returns when you release. If two physical controls seem to change the same card, repeat them separately so a simultaneous press does not confuse the comparison.</p>
+    <p>When the browser reports a standard mapping, the tool adds common positional names such as bottom face button, left shoulder, and D-pad up. Those names describe logical positions, not the letters printed on every brand of controller. A controller without standard mapping may expose vendor-specific button indexes. For that reason, this page keeps the index visible even when a name is shown. Write down a physical button and its observed index if you are troubleshooting a remapped game control.</p>
+
+    <h2>Read stick and axis values</h2>
+    <p>Analog axes are displayed as normalized values from approximately -1 to 1. A centered stick is usually near zero; movement in opposite directions changes the sign. Slowly push each stick left, right, up, and down, then release it. Look for a value that changes smoothly and returns near its starting point. The meter is a visualization of the browser value, not a calibrated measurement of physical stick travel or force.</p>
+    <p>A small nonzero reading while the stick is untouched does not automatically mean harmful drift. Sensors, drivers, and game dead zones may tolerate minor variation. A more useful observation is a persistent offset that also causes movement in the game where you noticed the issue. Keep your thumb completely off the stick for several seconds, repeat the reading, and compare the game's own calibration screen if one exists. If the problem appears only in one title, its dead-zone setting or remapping may be involved.</p>
+
+    <h2>Why mapping can differ across controllers</h2>
+    <p>The <a href="https://www.w3.org/TR/gamepad/" rel="noopener noreferrer">W3C Gamepad specification</a> defines the browser interface, button values, axes, and the optional standard mapping. The operating system and browser may translate a physical controller before the page receives it. A trigger can appear as a pressure-sensitive button on one setup and as an axis on another. A Home or system button may be reserved and never reach the browser. A missing browser event is therefore a symptom to compare, not immediate proof that the controller hardware is defective.</p>
+    <p>Controllers can also offer features beyond basic Gamepad API input, including motion sensors, touch surfaces, speakers, adaptive triggers, and advanced haptics. This tool does not test those features. It focuses on the controls most games map to ordinary buttons and axes. If you need to verify a brand-specific function, use the manufacturer's utility or the game that supports it directly.</p>
+
+    <h2>What to check when the gamepad does not appear</h2>
+    <p>Press a controller button after starting the tool. Disconnect and reconnect the cable, or repeat wireless pairing in the operating system. A USB cable that only carries power can make a controller light up without sending input data. Try a known data-capable cable and a direct USB port. For wireless devices, check battery level and whether another console or computer is still holding the pairing. Then test in a second current browser.</p>
+    <p>If the page detects the controller but a game does not, inspect that game's controller selection, input mode, platform launcher, and remapping software. Some games expect a specific layout or capture the device through a different API. Conversely, a controller that works in a game but is not listed here may be handled by that game or driver in a way the browser cannot access. Record which browser, connection mode, and controller mapping you used when reporting a problem.</p>
+
+    <h2>Make a useful controller comparison</h2>
+    <p>Test one control at a time in a fixed order: face buttons, shoulders, triggers, D-pad, stick presses, then each axis. Repeat a questionable result after reconnecting. If possible, compare wired and wireless modes with the same controller, or compare another controller on the same computer. A pattern that follows one device across systems is more informative than one unexpected card on one webpage. Avoid opening the controller or changing firmware based on a single browser reading.</p>
+    <p>For other input problems during gaming, the <a href="/keyboard-test">Keyboard Test</a> checks individual keys, the <a href="/keyboard-ghosting-test">Keyboard Ghosting Test</a> checks held combinations, and the <a href="/mouse-test">Mouse Test</a> checks pointer controls. These tools answer different input questions but help establish whether a problem is isolated to one device.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>
