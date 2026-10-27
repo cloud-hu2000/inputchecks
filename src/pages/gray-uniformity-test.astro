@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import MonitorPatternTool from '../components/MonitorPatternTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Check screen uniformity with fullscreen gray levels that can reveal uneven brightness or tint. Use consistent room lighting and compare the whole panel.';
+const faq = [
+  { question: 'What is screen uniformity?', answer: 'Uniformity describes how consistent a flat color or brightness level appears across the panel. This browser test lets you compare areas visually; it does not measure luminance or color with a sensor.' },
+  { question: 'Why use more than one gray level?', answer: 'Brightness and tint variation may be easier to notice at different levels. The tool includes several flat gray fields so you can repeat the same visual scan at darker, middle, and lighter tones.' },
+  { question: 'Can this gray uniformity test measure an exact percentage?', answer: 'No. The percentage labels refer to CSS gray values used to draw the browser pattern, not measured screen luminance. A photometer or colorimeter is needed for instrument readings.' },
+];
+const related = [
+  { href: '/dead-pixel-test', title: 'Dead Pixel Test', description: 'Check point-sized differences with solid colors.', icon: '▦' },
+  { href: '/gray-banding-test', title: 'Gray Banding Test', description: 'Inspect gradients for visible tonal steps.', icon: '▥' },
+  { href: '/motion-blur-test', title: 'Motion Blur Test', description: 'Watch a pattern move across the display.', icon: '↔' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Gray Uniformity Test', url: absoluteUrl('/gray-uniformity-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Gray Uniformity Test: Check Screen Uniformity" {description} path="/gray-uniformity-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Gray Uniformity Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Gray Uniformity Test</h1>
+    <p>Compare full-screen gray levels and scan the panel for broad changes in brightness or tint.</p>
+  </section>
+  <MonitorPatternTool kind="gray-uniformity" />
+  <article class="content">
+    <h2>How to use this gray uniformity test</h2>
+    <p>Start with 5% gray and scan the screen from the center to each edge and corner. Look for a broad patch that seems brighter, darker, warmer, or cooler than the rest of the field. Repeat the scan with 25%, 50%, and 75% gray, then use White if you want a bright reference. Keep your head near your normal viewing position and avoid comparing from sharply different angles. Select Full screen when you are ready to inspect the entire panel, then exit with Escape or the on-screen control.</p>
+    <p>Try to keep room lighting, screen brightness, and viewing distance steady for the whole comparison. Note the selected gray level and the region that looked different. If you change a monitor setting, return to the same level and scan again before moving to another control. This test does not save measurements, so a short written note can help you remember what you saw and repeat the check later.</p>
+
+    <h2>What display uniformity means</h2>
+    <p>Display uniformity describes how evenly a screen presents a flat image across its surface. A perfectly flat gray field should not contain image details, so broad shifts in brightness or tint may become easier to notice. People may describe these differences as clouding, shading, color tint, or uneven gray. The exact appearance depends on the panel, its size, backlight or emissive structure, viewing angle, and how the display is configured. A browser test can help you observe the pattern but cannot determine an acceptable tolerance for every model.</p>
+    <p>The labels 5%, 25%, 50%, and 75% describe CSS gray code values for the browser image. They are not percentages of measured light output. The <a href="https://www.w3.org/TR/css-color-4/" rel="noopener noreferrer">W3C CSS Color specification</a> explains how CSS color values and color spaces are represented, but actual luminance depends on the display and its settings. A colorimeter or photometer is needed for calibrated measurements in physical units.</p>
+
+    <h2>Why inspect several gray levels?</h2>
+    <p>A brightness or tint difference may be subtle at one level and easier to see at another. Dark gray can make low-level shading visible; middle gray gives a comfortable neutral field; lighter gray can reveal broader color casts. This tool offers several levels so you can compare rather than relying on a single screen. Check each one separately and allow your eyes to adjust for a moment after moving from dark to bright.</p>
+    <p>Do not assume that a screen is defective just because one field looks slightly different at its edges. Some panels change appearance with viewing angle, and large displays may look less uniform near the corners when viewed from the center. Room reflections, fingerprints, protective film, and the browser window itself can also influence what you see. Repeat the pattern from a consistent position and compare with normal content before deciding the observation matters.</p>
+
+    <h2>Distinguish uniformity from banding and pixel defects</h2>
+    <p>Uniformity refers to broad changes across a flat field. Banding refers to visible steps along a smooth gradient. A dead or stuck pixel is a point-sized difference. These can overlap visually, especially if a small bright spot catches your eye, so identify the scale of the pattern before troubleshooting. A large cloud-like region suggests a different question from a narrow tonal stripe or a single dot.</p>
+    <p>Use the <a href="/gray-banding-test">Gray Banding Test</a> to inspect smooth transitions and near-black steps. Use the <a href="/dead-pixel-test">Dead Pixel Test</a> to switch through solid colors and look for isolated pixels. Keeping a separate note for each type of observation makes it easier to describe the issue to a manufacturer or compare another display without mixing symptoms.</p>
+
+    <h2>Make a repeatable visual comparison</h2>
+    <p>For a baseline, disable animated backgrounds and close windows that create reflections. Keep the display at its normal resolution and avoid scaling changes between checks. If the monitor has local dimming, dynamic contrast, HDR, or a uniformity compensation mode, note whether each is enabled. You can compare settings one at a time, but restore your everyday configuration afterward. Changing several controls simultaneously makes it hard to identify which one altered the image.</p>
+    <p>When comparing two monitors, use similar brightness settings and a comparable viewing angle, while remembering that the same numeric control may not produce the same luminance on different models. A laptop panel can also look different depending on lid angle. If a visible patch appears only when viewed from the side, repeat straight on before treating it as a uniformity problem. For professional color work, follow the display maker's calibration process and use the measurement hardware it recommends.</p>
+
+    <h2>Why browser results can vary</h2>
+    <p>This page draws flat CSS colors inside your browser. Color profiles, browser management, operating system settings, graphics drivers, scaling, video processing, and monitor controls all affect the path from a CSS value to emitted light. The fullscreen display also remains under browser control; the <a href="https://fullscreen.spec.whatwg.org/" rel="noopener noreferrer">Fullscreen API standard</a> describes how pages request an immersive view, but it does not calibrate the display. A result from one computer is not a certified measurement or a reliable quality ranking against another setup.</p>
+    <p>Use the page as a quick way to create a stable field and guide a visual scan. It does not use a camera, access a light sensor, store readings, or change your display settings. If you need to document a measurable luminance or color difference, use suitable measurement equipment. If you see a persistent visual issue, compare another signal source or consult the support information for the exact display model.</p>
+
+    <h2>Related display checks</h2>
+    <p>Inspect individual pixels with the <a href="/dead-pixel-test">Dead Pixel Test</a>, tonal transitions with the <a href="/gray-banding-test">Gray Banding Test</a>, and moving edges with the <a href="/motion-blur-test">Motion Blur Test</a>. Each one answers a separate visual question; none provides a calibrated hardware diagnosis.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

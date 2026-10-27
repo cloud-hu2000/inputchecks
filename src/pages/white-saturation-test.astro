@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import DisplayCheckTool from '../components/DisplayCheckTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Inspect near-white steps to see whether highlight tones remain distinct. Compare settings carefully; this browser pattern is not a luminance measurement.';
+const faq = [
+  { question: 'Should I be able to see every near-white patch?', answer: 'The closest patches are intentionally subtle and may be difficult to separate in some viewing conditions. Look for a gradual transition without making the white background appear gray.' },
+  { question: 'Does this white saturation test measure screen brightness?', answer: 'No. The numbers are CSS RGB code values used to draw the pattern. They are not measurements of luminance, peak brightness, HDR output, or color accuracy.' },
+  { question: 'What should I adjust if several patches look identical?', answer: 'First confirm browser zoom, display range, HDR or SDR mode, and any dynamic contrast processing. If you compare a monitor setting, change only one control slightly and return to the original setting afterward.' },
+];
+const related = [
+  { href: '/color-bars-test', title: 'Color Bars Test', description: 'Compare primary and secondary color fields.', icon: '▥' },
+  { href: '/monitor-sharpness-test', title: 'Monitor Sharpness Test', description: 'Inspect fine patterns and edge rendering.', icon: '▦' },
+  { href: '/gray-banding-test', title: 'Gray Banding Test', description: 'Inspect grayscale transitions and dark tones.', icon: '◩' },
+  { href: '/gray-uniformity-test', title: 'Gray Uniformity Test', description: 'Compare flat gray levels across the display.', icon: '◧' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'White Saturation Test', url: absoluteUrl('/white-saturation-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="White Saturation Test – Check Highlight Detail" {description} path="/white-saturation-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'White Saturation Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>White Saturation Test</h1>
+    <p>Inspect near-white steps against a white field to compare visible highlight separation.</p>
+  </section>
+  <DisplayCheckTool kind="white-saturation" />
+  <article class="content">
+    <h2>How to use this white saturation test</h2>
+    <p>Choose Full near-white range to display patches with RGB values from 235 through 254 against white. Look for a gradual change as the numbers rise toward the background. Select Subtle highlight steps when you want to focus on the closest tones. Use Full screen for an unobstructed view, then exit before changing display settings. Keep the monitor brightness at the level you normally use and view from your usual position. The last few patches should be subtle; do not force visibility by turning the whole screen down until white looks gray.</p>
+    <p>Start with the display preset and signal path used for ordinary SDR desktop content. If a group of patches seems to merge, note which part of the sequence and repeat it after checking the computer's output range and any HDR mode. If you test a contrast or picture control, move only one setting a small amount, repeat the same pattern, and restore your baseline. The test does not store your observations, so record the setting and what changed if you need to compare later.</p>
+
+    <h2>What a white saturation test checks</h2>
+    <p>Near-white patches provide small differences in digital color values on a bright background. If several adjacent steps look identical, bright tones may be compressed or clipped somewhere in the image path. A smooth progression suggests that the browser and display are showing at least some of those differences under the current conditions. It does not show how bright the monitor can become or whether the display is calibrated. The labels describe the source values of a web pattern, not the physical light emitted by the screen.</p>
+    <p>CSS color values are interpreted by the browser and then passed through the system's graphics and color pipeline. The <a href="https://www.w3.org/TR/css-color-4/" rel="noopener noreferrer">W3C CSS Color specification</a> describes color representations used by web pages. Profiles, HDR conversion, video range, monitor processing, and ambient conditions can alter the appearance. A browser test is therefore a quick visual check, not a certified high-dynamic-range or luminance measurement.</p>
+
+    <h2>Understand the near-white values</h2>
+    <p>The pattern uses neutral red, green, and blue values together, so each swatch is a shade of gray approaching white. In the full range, RGB 235 is darker than RGB 254, while white is the background. The subtle range starts at RGB 248 and ends at RGB 254, giving you fewer, closer shades to inspect. These decimal numbers are digital channel values in the pattern. They do not correspond to a fixed number of nits, a percentage of a monitor's peak brightness, or an HDR mastering level.</p>
+    <p>Browser color management, operating-system output range, and the display's own tone response affect which steps remain distinct. Full-range versus limited-range settings can cause dark or bright levels to be mapped differently if the source and display disagree. Dynamic contrast, local dimming, automatic brightness, vivid modes, and HDR tone mapping may also change bright areas. This tool does not detect which setting is active; it provides a consistent browser image to compare.</p>
+
+    <h2>Avoid over-adjusting contrast</h2>
+    <p>If the upper patches merge, first check that the browser is at a normal zoom and that the monitor is using the intended input range and picture mode. Pause temporary filters or dynamic enhancement only if they are not the feature being evaluated. Then compare one monitor control at a time. A small reduction in excessive contrast may restore separation on some setups, but turning contrast down too far can make white dull and lower useful image brightness. Stop when the change helps preserve a natural white field and a smooth tonal transition.</p>
+    <p>Do not compensate for missing near-white detail by changing black level, brightness, color temperature, and contrast together. Those controls affect different portions of the image and may conceal one symptom while creating another. After a comparison, restore the original preset if the result is not repeatable. Confirm any important observation in ordinary images such as clouds, pale clothing, paper, or window reflections. The browser pattern makes a controlled clue, but real content shows whether the difference matters in everyday use.</p>
+
+    <h2>Separate clipping from uniformity or color tint</h2>
+    <p>Clipping merges bright tones in the signal or display path. Uniformity is a spatial difference where one region of the panel looks brighter or more tinted than another. A colored cast in the brightest patches can point to one channel reaching its limit before the others, but the page cannot identify the exact stage. If patches disappear only on one side, repeat the view from straight on and compare a flat field before deciding that the issue is highlight clipping.</p>
+    <p>Use the <a href="/gray-uniformity-test">Gray Uniformity Test</a> for differences across a flat field and the <a href="/gray-banding-test">Gray Banding Test</a> for visible steps along a gradient. The <a href="/color-bars-test">Color Bars Test</a> provides large primary and secondary fields to check for obvious channel changes. Separating these questions helps prevent a single unusual white patch from being treated as proof of a particular display fault.</p>
+
+    <h2>Limits of online white saturation patterns</h2>
+    <p>This page does not measure luminance, peak brightness, white point, HDR tone mapping, color temperature, or grayscale accuracy. It does not read the monitor's settings or calibrate the graphics pipeline. The result depends on your browser, operating system, profile, connection, panel, room, viewing angle, and eyesight. A subtle patch can be difficult to see even when no hardware fault exists, while a visible difference does not prove the panel meets any warranty or calibration threshold.</p>
+    <p>Use measurement hardware and the monitor manufacturer's documented procedure if you need calibrated values. A colorimeter or spectroradiometer measures light under a defined setup; this browser page only draws CSS swatches. For general checks, repeat the same visual pattern and note which conditions you changed. Do not use a screenshot or phone photo as an exact record of emitted brightness: cameras apply their own exposure, tone mapping, and white balance.</p>
+
+    <h2>Related display tests</h2>
+    <p>Check broad color fields with the <a href="/color-bars-test">Color Bars Test</a>, fine line rendering with the <a href="/monitor-sharpness-test">Monitor Sharpness Test</a>, and grayscale transitions with the <a href="/gray-banding-test">Gray Banding Test</a>. Use the <a href="/gray-uniformity-test">Gray Uniformity Test</a> for screen-wide changes across flat gray fields.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

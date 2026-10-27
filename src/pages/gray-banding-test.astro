@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import MonitorPatternTool from '../components/MonitorPatternTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Inspect monitor banding with fullscreen grayscale gradients, near-black shades, and mid-gray patterns. Compare what you see at a normal viewing distance.';
+const faq = [
+  { question: 'What does a gray banding test look for?', answer: 'It displays smooth grayscale transitions and simple gray fields so you can look for visible steps, stripes, or patches. The pattern is a visual aid, not a measurement of bit depth or panel quality.' },
+  { question: 'Why do I see bands on one screen but not another?', answer: 'Displays, graphics settings, color profiles, browser rendering, scaling, viewing angle, and room lighting can all change the result. Compare screens under similar conditions and avoid drawing a conclusion from one pattern.' },
+  { question: 'Is banding always caused by the monitor?', answer: 'No. Banding can be introduced by image content, compression, color processing, applications, or display settings. Check a browser-generated pattern and other content before treating it as a panel issue.' },
+];
+const related = [
+  { href: '/dead-pixel-test', title: 'Dead Pixel Test', description: 'Inspect the panel with solid color fields.', icon: '▦' },
+  { href: '/gray-uniformity-test', title: 'Gray Uniformity Test', description: 'Check broad brightness and tint changes.', icon: '◩' },
+  { href: '/motion-blur-test', title: 'Motion Blur Test', description: 'Compare a moving high-contrast pattern.', icon: '↔' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Gray Banding Test', url: absoluteUrl('/gray-banding-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Gray Banding Test: Inspect Monitor Gradients" {description} path="/gray-banding-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Gray Banding Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Gray Banding Test</h1>
+    <p>View fullscreen grayscale gradients and fields to look for visible steps, stripes, or uneven transitions.</p>
+  </section>
+  <MonitorPatternTool kind="gray-banding" />
+  <article class="content">
+    <h2>How to use this gray banding test</h2>
+    <p>Choose Full grayscale gradient to show a continuous transition from black to white. Scan from one edge to the other and look for abrupt boundaries that appear as bands instead of a smooth change. Then select Near-black gradient to focus on the dark end of the range, where subtle steps can be difficult to see. The 5% gray and 50% gray fields provide simple references for comparing a broad section of the panel. Use Full screen to make the pattern fill more of the display, then exit before changing browser or monitor settings.</p>
+    <p>Use your normal viewing position and give your eyes a moment to adjust after each switch. Some steps may become easier to see when you look slightly away from the screen rather than staring directly at one boundary. If you compare two monitors, show the same pattern at the same size and keep the room lighting similar. Write down which pattern and region looked unusual so you can repeat that specific observation later.</p>
+
+    <h2>What monitor banding looks like</h2>
+    <p>Banding is a visible step or stripe in a tone transition that would otherwise look smooth. On a grayscale gradient, the transition may appear as distinct blocks or narrow horizontal or vertical lines. The effect may be strongest in very dark tones or around a particular brightness level. A perfectly smooth result is not guaranteed on every device: the browser, operating system, graphics path, display profile, and panel all take part in drawing the pattern.</p>
+    <p>CSS color values and gradients are rendered through browser graphics and the display pipeline. The <a href="https://www.w3.org/TR/css-images-4/" rel="noopener noreferrer">W3C CSS Images specification</a> defines gradient images and color interpolation options, while the <a href="https://www.w3.org/TR/css-color-4/" rel="noopener noreferrer">CSS Color specification</a> describes color spaces used by CSS. Those standards explain the web pattern, not the complete behavior of a specific monitor. Treat the page as a repeatable browser image that can help you compare conditions, rather than a calibrated signal generator.</p>
+
+    <h2>Separate gradient banding from screen uniformity</h2>
+    <p>A gradient changes from one shade to another across the image. Banding describes visible steps along that changing range. Uniformity describes whether a nominally flat area looks consistent across different parts of the screen. The two can look similar when a transition appears patchy, but they answer different questions. On this page, the gradient modes are for transitions; the 5% and 50% fields are flat references that can help you notice broad unevenness.</p>
+    <p>For a more focused flat-field comparison, use the <a href="/gray-uniformity-test">Gray Uniformity Test</a>. It offers several gray levels and asks you to scan the center, edges, and corners. For small individual points rather than broad shading, use the <a href="/dead-pixel-test">Dead Pixel Test</a>. Keeping these checks separate makes it easier to note whether you saw steps in a gradient, a large-area tint change, or a point-sized difference.</p>
+
+    <h2>Check near-black transitions carefully</h2>
+    <p>Dark gradients are easy to misread in a bright room or when the display brightness is very low. Reduce reflections, avoid strong light shining directly on the panel, and let your eyes adjust after switching from a bright page. Do not raise monitor brightness repeatedly while inspecting a single pattern; first observe a baseline, then change one control and return to the same pattern. A change in perceived banding can come from adaptation or room lighting, not just from the display setting.</p>
+    <p>Some display modes intentionally alter shadow detail, contrast, local dimming, or tone mapping. HDR mode, a “black equalizer,” dynamic contrast, and color enhancements can make a near-black field look different from ordinary desktop content. If you use these controls, record their current state before comparing. Restore your preferred settings after the check rather than leaving a test-only mode enabled by accident.</p>
+
+    <h2>Common sources of apparent banding</h2>
+    <p>A band may originate in the image itself, such as a compressed photo or a gradient exported with limited tonal steps. Video encoding, application effects, color conversion, and graphics settings may add visible transitions before the signal reaches the monitor. If the browser-generated gradient looks smooth but a specific video shows bands, investigate the content and playback pipeline first. If the same line appears at the same screen location across several patterns, compare another browser, another input, or another device.</p>
+    <p>Scaling and display sharpening can also change edge appearance. Try the monitor's recommended resolution and a standard refresh mode before comparing. If you use a dock, remote desktop, capture card, or adapter, repeat the check on a direct connection when practical. Change only one part of the setup at a time; otherwise, you may not know which change affected the pattern.</p>
+
+    <h2>Limits of an online banding pattern</h2>
+    <p>This gray banding test does not measure bit depth, color accuracy, gamma, contrast ratio, or panel response with an instrument. It displays browser-drawn patterns and relies on your visual observation. The result can vary with the screen model, pixel density, color profile, operating system, graphics driver, browser, scaling, viewing angle, ambient lighting, and individual eyesight. A visible step is a useful observation to reproduce, but it is not proof of a defective panel.</p>
+    <p>Full screen is optional. If your browser does not allow it, compare the pattern in the page without changing zoom. The browser controls when a page can enter full screen, and the <a href="https://fullscreen.spec.whatwg.org/" rel="noopener noreferrer">Fullscreen API standard</a> describes that user-initiated capability. For measured color work, use a suitable calibration instrument and the monitor manufacturer's workflow. This page is intended for a quick visual comparison, not professional proof or a warranty determination.</p>
+
+    <h2>Related display checks</h2>
+    <p>Use the <a href="/gray-uniformity-test">Gray Uniformity Test</a> to compare flat gray levels, the <a href="/dead-pixel-test">Dead Pixel Test</a> to inspect solid colors for point defects, or the <a href="/motion-blur-test">Motion Blur Test</a> to observe a moving pattern. These tools cover different visual checks and do not replace a colorimeter or a service test.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

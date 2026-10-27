@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import DisplayCheckTool from '../components/DisplayCheckTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'View fine checkerboards and alternating lines to spot scaling softness, ringing, or excess sharpening. Compare at native resolution and 100% browser zoom.';
+const faq = [
+  { question: 'Why do the fine lines look uneven or shimmer?', answer: 'Fine browser patterns are sensitive to display scaling, browser zoom, device pixel ratio, viewing distance, and panel structure. Confirm native resolution and repeat at 100% browser zoom before adjusting sharpness.' },
+  { question: 'Does a higher sharpness setting mean a clearer screen?', answer: 'Not necessarily. Strong sharpening can add bright or dark outlines around edges. Compare the fine pattern and ordinary text or images, then use the setting that preserves detail without obvious halos.' },
+  { question: 'Can this test prove one-pixel mapping?', answer: 'No. The page cannot guarantee that one CSS pixel maps to one physical panel pixel on every browser and device. System scaling and display density affect the rendered pattern.' },
+];
+const related = [
+  { href: '/color-bars-test', title: 'Color Bars Test', description: 'Compare primary and secondary color fields.', icon: '▥' },
+  { href: '/white-saturation-test', title: 'White Saturation Test', description: 'Check detail near the white end of the range.', icon: '◻' },
+  { href: '/dead-pixel-test', title: 'Dead Pixel Test', description: 'Inspect solid color fields for point defects.', icon: '◩' },
+  { href: '/gray-banding-test', title: 'Gray Banding Test', description: 'Look for visible steps in smooth gradients.', icon: '▦' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Monitor Sharpness Test', url: absoluteUrl('/monitor-sharpness-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Monitor Sharpness Test – Check Screen Detail" {description} path="/monitor-sharpness-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Monitor Sharpness Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Monitor Sharpness Test</h1>
+    <p>View fine checkerboards and alternating lines to compare edge clarity, scaling, and sharpening artifacts.</p>
+  </section>
+  <DisplayCheckTool kind="sharpness" />
+  <article class="content">
+    <h2>How to use this monitor sharpness test</h2>
+    <p>Set the operating system to the display's native resolution and the browser to 100% zoom for your first comparison. Start with the fine checkerboard, then select Vertical lines and Horizontal lines. View each pattern from your normal working distance before moving closer to see the structure. Use Full screen if you want to remove page chrome, then return before changing any monitor control. Look for lines that merge, vary in thickness, shimmer, blur, or gain a bright or dark outline.</p>
+    <p>If you compare sharpness settings, keep the resolution, browser zoom, scaling, and viewing position fixed. Change the monitor's sharpness control by one small step, repeat the same pattern, and restore the original setting to confirm what changed. Compare ordinary text and photos too. A test pattern can make a setting appear crisp while everyday content looks harsh, so use both the controlled image and the type of material you normally view.</p>
+
+    <h2>What a monitor sharpness test reveals</h2>
+    <p>Fine alternating patterns make resampling and edge enhancement easier to notice. A clear, stable pattern can suggest that the current image path preserves small contrasts well. Soft blocks, uneven lines, or shimmering may appear when the browser or operating system scales a pattern to a different pixel grid. Bright or dark outlines near high-contrast edges can be a sign of sharpening or ringing. These are visible clues, not a numerical measure of optical sharpness or resolution.</p>
+    <p>Monitor sharpness is one of several display characteristics covered by the <a href="https://www.eizo.com/library/basics/eizo-monitor-test/" rel="noopener noreferrer">EIZO monitor test guide</a>, which includes a text sharpness check alongside other visual patterns. The useful result depends on the intended display category and its recommended signal. A laptop screen, a high-density monitor, a gaming display, and a graphics monitor can render the same browser pattern differently without sharing the same problem.</p>
+
+    <h2>Start with native resolution and browser zoom</h2>
+    <p>LCD and OLED panels have a fixed physical pixel grid. When the computer sends a different resolution, the graphics system or monitor must resample the image. Some edges then cover multiple physical pixels and can look softer or uneven. Set the desktop to the panel's recommended native resolution before judging a sharpness control. Browser zoom and operating-system scaling affect the size of CSS patterns, so keep them fixed when comparing.</p>
+    <p>High-density displays often use operating-system scaling to keep text readable. That is normal. It also means the relationship between one CSS pixel and one physical pixel may not be one-to-one. The browser may render the 1 CSS pixel lines across fractional or multiple device pixels. The test therefore asks you to compare repeatable patterns under a stable setup; it cannot certify exact pixel mapping in every display-density configuration.</p>
+
+    <h2>Recognize common sharpness artifacts</h2>
+    <p>Uniform softness across the whole pattern may relate to non-native resolution, scaling, a connection path, or the viewing distance. Alternating columns that look different in width can result from resampling. A light halo beside a dark edge, or a dark echo beside a light edge, may be added by a sharpness filter. Fine lines that crawl or appear to sparkle can be a moiré interaction between the displayed pattern and the panel's pixel structure. A phone photo can exaggerate moiré even when it is not obvious to your eyes.</p>
+    <p>Color fringes around edges can involve chroma subsampling, subpixel arrangement, color filtering, or scaling rather than the monitor's sharpness control alone. Compare black-and-white patterns first, then inspect colored text or bars if the issue only appears on color content. Do not infer that a cable or panel is defective from one pattern. Try another browser, input, or computer if the finding persists and matters to your normal work.</p>
+
+    <h2>Choose a sharpness setting without adding halos</h2>
+    <p>Higher sharpness is not automatically better. Some controls increase local contrast around edges instead of restoring detail that was never present. A pattern may look more dramatic while also gaining ringing, grain, or an artificial outline. Move the control gradually and compare an unchanged baseline. The goal is a stable image that preserves fine detail without obvious edge echoes, not the strongest possible contrast around each line.</p>
+    <p>Monitor presets may apply sharpening differently to text, video, and game modes. Graphics drivers and applications can also add scaling or clarity filters. If one application looks soft while this browser pattern appears clean, inspect the application's scaling and rendering settings before changing a global display control. Return to your original value if the change creates halos in natural content.</p>
+
+    <h2>Understand the limits of browser sharpness patterns</h2>
+    <p>This monitor sharpness test draws CSS patterns in a browser. It does not read the screen's native resolution, pixel layout, internal sharpness setting, or graphics output format. Device pixel ratio, operating-system scaling, browser rendering, zoom, and display processing can all alter the pattern. It cannot calculate a modulation transfer function, certify one-to-one physical pixel mapping, or determine that a monitor meets a manufacturer's specification.</p>
+    <p>Use the test to make an A/B comparison, then confirm the result with text, icons, photographs, or video you actually use. If a quantitative image-quality decision is needed, follow the display maker's procedure and use a defined test source. A visual browser pattern is valuable for locating a symptom and making a controlled comparison, but it is not an optical laboratory measurement.</p>
+
+    <h2>Related display tests</h2>
+    <p>Use the <a href="/color-bars-test">Color Bars Test</a> for obvious channel differences, the <a href="/white-saturation-test">White Saturation Test</a> for near-white detail, and the <a href="/dead-pixel-test">Dead Pixel Test</a> for point-sized defects. The <a href="/gray-banding-test">Gray Banding Test</a> shows whether smooth tone transitions contain visible steps.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

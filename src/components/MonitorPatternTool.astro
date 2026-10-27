@@ -1,0 +1,228 @@
+---
+interface Props { kind: 'dead-pixel' | 'gray-banding' | 'gray-uniformity' | 'motion-blur' }
+const { kind } = Astro.props;
+const isDeadPixel = kind === 'dead-pixel';
+const isBanding = kind === 'gray-banding';
+const isUniformity = kind === 'gray-uniformity';
+const isMotion = kind === 'motion-blur';
+const colors = [
+  { name: 'White', value: '#ffffff' }, { name: 'Black', value: '#000000' },
+  { name: 'Red', value: '#ff0000' }, { name: 'Green', value: '#00a000' },
+  { name: 'Blue', value: '#0000ff' }, { name: 'Cyan', value: '#00ffff' },
+  { name: 'Magenta', value: '#ff00ff' }, { name: 'Yellow', value: '#ffff00' },
+];
+const bandingPatterns = [
+  { id: 'full', label: 'Full grayscale gradient' },
+  { id: 'dark', label: 'Near-black gradient' },
+  { id: 'five', label: '5% gray field' },
+  { id: 'mid', label: '50% gray field' },
+];
+const grayLevels = [
+  { id: 'five', label: '5% gray', value: '#0d0d0d' },
+  { id: 'twenty-five', label: '25% gray', value: '#404040' },
+  { id: 'mid', label: '50% gray', value: '#808080' },
+  { id: 'seventy-five', label: '75% gray', value: '#bfbfbf' },
+  { id: 'white', label: 'White', value: '#ffffff' },
+];
+---
+
+<section class={`tester monitor-tester ${isMotion ? 'motion-tester' : ''}`} data-monitor-tester data-kind={kind}>
+  {isDeadPixel && <>
+    <div class="monitor-toolbar pixel-toolbar" aria-label="Dead pixel test controls">
+      <button class="button secondary" type="button" data-previous-color aria-label="Previous color">← Previous</button>
+      <button class="button secondary" type="button" data-next-color aria-label="Next color">Next →</button>
+      <button class="button secondary" type="button" data-auto-cycle aria-pressed="false">Start auto cycle</button>
+      <button class="button primary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="monitor-stage pixel-stage" data-pixel-stage style={`--pattern-color:${colors[0].value}`} role="img" aria-label="Solid white screen inspection pattern">
+      <span class="pattern-label" data-color-label aria-live="polite">Color 1 of 8: White</span>
+    </div>
+    <p class="monitor-status" data-monitor-status aria-live="polite">Use Previous and Next to inspect each color. Look across the panel for pixels that stay different from the surrounding color.</p>
+  </>}
+
+  {isBanding && <>
+    <div class="monitor-toolbar pattern-toolbar" aria-label="Gray banding test controls">
+      {bandingPatterns.map((pattern, index) => <button class={`button ${index === 0 ? 'secondary' : 'secondary'}`} type="button" data-pattern-choice={pattern.id} aria-pressed={index === 0 ? 'true' : 'false'}>{pattern.label}</button>)}
+      <button class="button primary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="monitor-stage banding-stage" data-banding-stage data-pattern="full" role="img" aria-label="Full grayscale gradient from black to white"></div>
+    <p class="monitor-status" data-monitor-status aria-live="polite">Full grayscale gradient. Look for visible steps in a transition that should appear smooth.</p>
+  </>}
+
+  {isUniformity && <>
+    <div class="monitor-toolbar pattern-toolbar" aria-label="Gray uniformity test controls">
+      {grayLevels.map((level, index) => <button class="button secondary" type="button" data-gray-level={level.id} aria-pressed={index === 0 ? 'true' : 'false'}>{level.label}</button>)}
+      <button class="button primary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="monitor-stage uniformity-stage" data-uniformity-stage style={`--gray-level:${grayLevels[0].value}`} role="img" aria-label="Uniform 5 percent gray field">
+      <span class="pattern-label" data-gray-label>5% gray</span>
+    </div>
+    <p class="monitor-status" data-monitor-status aria-live="polite">5% gray field. Scan the center, edges, and corners for visible changes in brightness or tint.</p>
+  </>}
+
+  {isMotion && <>
+    <div class="motion-controls">
+      <button class="button primary" type="button" data-motion-toggle aria-pressed="false">Start motion</button>
+      <label for="motion-speed">Speed <output data-speed-value>480</output> px/s</label>
+      <input id="motion-speed" data-motion-speed type="range" min="120" max="960" step="40" value="480" />
+      <button class="button secondary" type="button" data-motion-direction aria-pressed="false">Direction: left to right</button>
+      <button class="button secondary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="monitor-stage motion-stage" data-motion-stage aria-label="High contrast moving pattern test area">
+      <div class="motion-track" aria-hidden="true"></div>
+      <div class="motion-target" data-motion-target aria-hidden="true"><span></span><i></i></div>
+    </div>
+    <p class="monitor-status" data-monitor-status aria-live="polite">Press Start motion, then watch the moving edge. Adjust speed and compare one display setting at a time.</p>
+  </>}
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-monitor-tester]');
+  if (root) {
+    const kind = root.dataset.kind;
+    const fullscreenButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-fullscreen]')];
+    const status = root.querySelector<HTMLElement>('[data-monitor-status]');
+    const setStatus = (message: string) => { if (status) status.textContent = message; };
+    fullscreenButtons.forEach((button) => button.addEventListener('click', async () => {
+      try {
+        if (document.fullscreenElement === root) await document.exitFullscreen();
+        else await root.requestFullscreen();
+      } catch {
+        setStatus('Full screen is unavailable in this browser or tab. You can still inspect the pattern at its current size.');
+      }
+    }));
+    document.addEventListener('fullscreenchange', () => {
+      const active = document.fullscreenElement === root;
+      fullscreenButtons.forEach((button) => { button.textContent = active ? 'Exit full screen' : 'Full screen'; });
+      if (active) root.focus({ preventScroll: true });
+    });
+
+    if (kind === 'dead-pixel') {
+      const palette = [
+        { name: 'White', value: '#ffffff' }, { name: 'Black', value: '#000000' },
+        { name: 'Red', value: '#ff0000' }, { name: 'Green', value: '#00a000' },
+        { name: 'Blue', value: '#0000ff' }, { name: 'Cyan', value: '#00ffff' },
+        { name: 'Magenta', value: '#ff00ff' }, { name: 'Yellow', value: '#ffff00' },
+      ];
+      const stage = root.querySelector<HTMLElement>('[data-pixel-stage]')!;
+      const label = root.querySelector<HTMLElement>('[data-color-label]')!;
+      const previous = root.querySelector<HTMLButtonElement>('[data-previous-color]')!;
+      const next = root.querySelector<HTMLButtonElement>('[data-next-color]')!;
+      const auto = root.querySelector<HTMLButtonElement>('[data-auto-cycle]')!;
+      let index = 0;
+      let timer: number | undefined;
+      const showColor = () => {
+        const color = palette[index];
+        stage.style.setProperty('--pattern-color', color.value);
+        stage.setAttribute('aria-label', `Solid ${color.name.toLowerCase()} screen inspection pattern`);
+        label.textContent = `Color ${index + 1} of ${palette.length}: ${color.name}`;
+      };
+      const move = (delta: number) => { index = (index + delta + palette.length) % palette.length; showColor(); };
+      const stopAuto = () => { if (timer !== undefined) window.clearInterval(timer); timer = undefined; auto.textContent = 'Start auto cycle'; auto.setAttribute('aria-pressed', 'false'); };
+      previous.addEventListener('click', () => { stopAuto(); move(-1); });
+      next.addEventListener('click', () => { stopAuto(); move(1); });
+      auto.addEventListener('click', () => {
+        if (timer !== undefined) stopAuto();
+        else { timer = window.setInterval(() => move(1), 1800); auto.textContent = 'Stop auto cycle'; auto.setAttribute('aria-pressed', 'true'); }
+      });
+      document.addEventListener('keydown', (event) => {
+        if (document.fullscreenElement !== root || event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key === 'ArrowRight') { event.preventDefault(); stopAuto(); move(1); }
+        if (event.key === 'ArrowLeft') { event.preventDefault(); stopAuto(); move(-1); }
+        if (event.key === ' ') { event.preventDefault(); auto.click(); }
+      });
+    }
+
+    if (kind === 'gray-banding') {
+      const stage = root.querySelector<HTMLElement>('[data-banding-stage]')!;
+      const choices = [...root.querySelectorAll<HTMLButtonElement>('[data-pattern-choice]')];
+      const labels: Record<string, string> = { full: 'Full grayscale gradient', dark: 'Near-black gradient', five: '5% gray field', mid: '50% gray field' };
+      const select = (id: string) => {
+        stage.dataset.pattern = id;
+        stage.setAttribute('aria-label', `${labels[id]} for visual display inspection`);
+        choices.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.patternChoice === id)));
+        setStatus(`${labels[id]}. Look for uneven steps, visible bands, or patches. Appearance depends on the panel, browser, and room lighting.`);
+      };
+      choices.forEach((button) => button.addEventListener('click', () => select(button.dataset.patternChoice!)));
+    }
+
+    if (kind === 'gray-uniformity') {
+      const stage = root.querySelector<HTMLElement>('[data-uniformity-stage]')!;
+      const label = root.querySelector<HTMLElement>('[data-gray-label]')!;
+      const levels = [...root.querySelectorAll<HTMLButtonElement>('[data-gray-level]')];
+      const values: Record<string, { label: string; color: string }> = {
+        five: { label: '5% gray', color: '#0d0d0d' }, 'twenty-five': { label: '25% gray', color: '#404040' },
+        mid: { label: '50% gray', color: '#808080' }, 'seventy-five': { label: '75% gray', color: '#bfbfbf' }, white: { label: 'White', color: '#ffffff' },
+      };
+      levels.forEach((button) => button.addEventListener('click', () => {
+        const level = values[button.dataset.grayLevel!];
+        stage.style.setProperty('--gray-level', level.color); label.textContent = level.label;
+        stage.setAttribute('aria-label', `Uniform ${level.label} field`);
+        levels.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        setStatus(`${level.label} field. Scan the center, edges, and corners, then compare another level using the same room lighting.`);
+      }));
+    }
+
+    if (kind === 'motion-blur') {
+      const stage = root.querySelector<HTMLElement>('[data-motion-stage]')!;
+      const target = root.querySelector<HTMLElement>('[data-motion-target]')!;
+      const toggle = root.querySelector<HTMLButtonElement>('[data-motion-toggle]')!;
+      const direction = root.querySelector<HTMLButtonElement>('[data-motion-direction]')!;
+      const speed = root.querySelector<HTMLInputElement>('[data-motion-speed]')!;
+      const output = root.querySelector<HTMLOutputElement>('[data-speed-value]')!;
+      let running = false;
+      let reverse = false;
+      const updateMotion = () => {
+        const distance = Math.max(0, stage.clientWidth - target.offsetWidth);
+        const duration = Math.max(0.2, distance / Number(speed.value));
+        stage.style.setProperty('--motion-duration', `${duration}s`);
+        stage.style.setProperty('--motion-distance', `${distance}px`);
+      };
+      const setRunning = (next: boolean) => {
+        running = next; stage.classList.toggle('is-running', running);
+        toggle.textContent = running ? 'Pause motion' : 'Start motion'; toggle.setAttribute('aria-pressed', String(running));
+        setStatus(running ? `Moving at ${speed.value} CSS pixels per second. Look at the target edge and any visible trail; results depend on the whole display and browser setup.` : 'Motion paused. Change a setting, then start again to compare.');
+      };
+      toggle.addEventListener('click', () => setRunning(!running));
+      speed.addEventListener('input', () => { output.value = speed.value; output.textContent = speed.value; updateMotion(); if (running) setStatus(`Moving at ${speed.value} CSS pixels per second. Look at the target edge and any visible trail.`); });
+      direction.addEventListener('click', () => {
+        reverse = !reverse; stage.classList.toggle('reverse', reverse);
+        direction.textContent = reverse ? 'Direction: right to left' : 'Direction: left to right';
+        direction.setAttribute('aria-pressed', String(reverse));
+      });
+      new ResizeObserver(updateMotion).observe(stage);
+      updateMotion();
+    }
+  }
+</script>
+
+<style>
+  .monitor-tester{padding:18px}
+  .monitor-toolbar,.motion-controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .monitor-toolbar .button,.motion-controls .button{font-size:.86rem;padding:8px 11px}
+  .pattern-toolbar button[aria-pressed="true"]{background:#d5e9e7;border-color:#8ab9b5}
+  .monitor-stage{height:min(58vh,560px);min-height:300px;border-radius:8px;overflow:hidden;position:relative;background:#fff;outline:none}
+  .pixel-stage,.uniformity-stage{background:var(--pattern-color,var(--gray-level,#fff));border:1px solid #dce4ea;transition:background-color .12s}
+  .pattern-label{position:absolute;left:12px;top:12px;border-radius:6px;padding:4px 8px;background:rgba(255,255,255,.84);color:#172333;font-size:.78rem;font-weight:700}
+  .monitor-status{font-size:.86rem;color:var(--muted);margin:12px 0 0}
+  .banding-stage[data-pattern="full"]{background:linear-gradient(90deg,#000,#fff)}
+  .banding-stage[data-pattern="dark"]{background:linear-gradient(90deg,#000,#404040)}
+  .banding-stage[data-pattern="five"]{background:#0d0d0d}
+  .banding-stage[data-pattern="mid"]{background:#808080}
+  .motion-controls label{font-weight:700;font-size:.9rem}
+  .motion-controls output{font-variant-numeric:tabular-nums}
+  .motion-controls input[type="range"]{width:min(260px,100%);accent-color:var(--accent)}
+  .motion-stage{background-color:#fff;background-image:repeating-linear-gradient(90deg,#171717 0 2px,transparent 2px 8px)}
+  .motion-track{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(23,35,51,.22);transform:translateY(-50%)}
+  .motion-target{position:absolute;left:0;top:50%;width:54px;height:78px;margin-top:-39px;transform:translateX(0);background:#fff;border:4px solid #111;box-shadow:0 0 0 2px #fff;animation:monitor-travel var(--motion-duration,3s) linear infinite paused alternate}
+  .motion-target span{position:absolute;left:19px;top:-4px;bottom:-4px;width:8px;background:#111}
+  .motion-target i{position:absolute;left:-4px;right:-4px;top:33px;height:5px;background:#111}
+  .motion-stage.is-running .motion-target{animation-play-state:running}
+  .motion-stage.reverse .motion-target{animation-direction:alternate-reverse}
+  @keyframes monitor-travel{from{transform:translateX(0)}to{transform:translateX(var(--motion-distance,500px))}}
+  .monitor-tester:fullscreen{width:100vw;height:100vh;height:100dvh;max-width:none;margin:0;padding:20px;border:0;border-radius:0;display:flex;flex-direction:column;justify-content:center;box-shadow:none}
+  .monitor-tester:fullscreen .monitor-stage{width:100%;height:auto;min-height:0;flex:1;max-height:calc(100dvh - 115px)}
+  .monitor-tester:fullscreen .pixel-stage,.monitor-tester:fullscreen .uniformity-stage{border:0;border-radius:0}
+  .monitor-tester:fullscreen .monitor-status{color:inherit}
+  @media(max-width:760px){.monitor-stage{height:48vh;min-height:250px}.monitor-tester:fullscreen{padding:12px}.motion-controls{gap:8px}.motion-controls input[type="range"]{flex:1;min-width:130px}}
+</style>

@@ -1,0 +1,161 @@
+---
+interface Props { kind: 'color-bars' | 'white-saturation' | 'sharpness' }
+const { kind } = Astro.props;
+const colors = [
+  { name: 'White', value: '#ffffff' }, { name: 'Yellow', value: '#ffff00' },
+  { name: 'Cyan', value: '#00ffff' }, { name: 'Green', value: '#00ff00' },
+  { name: 'Magenta', value: '#ff00ff' }, { name: 'Red', value: '#ff0000' },
+  { name: 'Blue', value: '#0000ff' }, { name: 'Black', value: '#000000' },
+];
+const nearWhiteValues = Array.from({ length: 20 }, (_, index) => 235 + index);
+---
+
+<section class="tester display-check" data-display-check data-kind={kind}>
+  {kind === 'color-bars' && <>
+    <div class="display-check-controls" aria-label="Color bars test controls">
+      <button class="button secondary" type="button" data-color-preset="bars" aria-pressed="true">Primary and secondary bars</button>
+      <button class="button secondary" type="button" data-color-preset="pairs" aria-pressed="false">RGB channel pairs</button>
+      <button class="button primary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="display-check-stage color-bars-stage" data-color-stage data-layout="bars" role="img" aria-label="White, yellow, cyan, green, magenta, red, blue, and black vertical color bars">
+      {colors.map((color) => <div class="color-bar" style={`--bar-color:${color.value}`}><span>{color.name}</span></div>)}
+    </div>
+    <p class="display-check-status" data-display-status aria-live="polite">Primary and secondary bars. Check that each field is stable and visibly distinct.</p>
+  </>}
+
+  {kind === 'white-saturation' && <>
+    <div class="display-check-controls" aria-label="White saturation test controls">
+      <button class="button secondary" type="button" data-white-range="235-254" aria-pressed="true">Full near-white range</button>
+      <button class="button secondary" type="button" data-white-range="248-254" aria-pressed="false">Subtle highlight steps</button>
+      <button class="button primary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="display-check-stage white-stage" data-white-stage role="img" aria-label="Near-white patches from RGB 235 through 254 on a white background">
+      <div class="white-swatches" data-white-swatches>
+        {nearWhiteValues.map((value) => <div class="white-swatch"><span class="swatch-chip" style={`--swatch:rgb(${value},${value},${value})`}></span><span class="swatch-value">{value}</span></div>)}
+      </div>
+    </div>
+    <p class="display-check-status" data-display-status aria-live="polite">RGB 235–254 on white. The closest steps are intentionally subtle; keep the screen at its normal white level.</p>
+  </>}
+
+  {kind === 'sharpness' && <>
+    <div class="display-check-controls" aria-label="Monitor sharpness test controls">
+      <button class="button secondary" type="button" data-sharp-pattern="checker" aria-pressed="true">Fine checkerboard</button>
+      <button class="button secondary" type="button" data-sharp-pattern="vertical" aria-pressed="false">Vertical lines</button>
+      <button class="button secondary" type="button" data-sharp-pattern="horizontal" aria-pressed="false">Horizontal lines</button>
+      <button class="button primary" type="button" data-fullscreen>Full screen</button>
+    </div>
+    <div class="display-check-stage sharpness-stage" data-sharp-stage data-pattern="checker" role="img" aria-label="Fine black and white checkerboard for monitor sharpness inspection"></div>
+    <p class="display-check-status" data-display-status aria-live="polite">Fine checkerboard. Begin at the display's native resolution and 100% browser zoom.</p>
+  </>}
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-display-check]');
+  if (root) {
+    const kind = root.dataset.kind;
+    const status = root.querySelector<HTMLElement>('[data-display-status]');
+    const setStatus = (value: string) => { if (status) status.textContent = value; };
+    const fullscreenButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-fullscreen]')];
+    fullscreenButtons.forEach((button) => button.addEventListener('click', async () => {
+      try {
+        if (document.fullscreenElement === root) await document.exitFullscreen();
+        else await root.requestFullscreen();
+      } catch {
+        setStatus('Full screen is not available in this browser or tab. You can still inspect the pattern in this area.');
+      }
+    }));
+    document.addEventListener('fullscreenchange', () => {
+      const active = document.fullscreenElement === root;
+      fullscreenButtons.forEach((button) => { button.textContent = active ? 'Exit full screen' : 'Full screen'; });
+    });
+
+    if (kind === 'color-bars') {
+      const stage = root.querySelector<HTMLElement>('[data-color-stage]')!;
+      const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-color-preset]')];
+      const bars = [
+        { name: 'White', value: '#ffffff' }, { name: 'Yellow', value: '#ffff00' },
+        { name: 'Cyan', value: '#00ffff' }, { name: 'Green', value: '#00ff00' },
+        { name: 'Magenta', value: '#ff00ff' }, { name: 'Red', value: '#ff0000' },
+        { name: 'Blue', value: '#0000ff' }, { name: 'Black', value: '#000000' },
+      ];
+      const pairs = [
+        { name: 'Red / cyan', value: 'linear-gradient(90deg,#f00 0 50%,#0ff 50%)' },
+        { name: 'Green / magenta', value: 'linear-gradient(90deg,#0f0 0 50%,#f0f 50%)' },
+        { name: 'Blue / yellow', value: 'linear-gradient(90deg,#00f 0 50%,#ff0 50%)' },
+      ];
+      const select = (preset: string) => {
+        const items = preset === 'pairs' ? pairs : bars;
+        stage.dataset.layout = preset;
+        stage.replaceChildren(...items.map((item) => {
+          const bar = document.createElement('div'); bar.className = 'color-bar'; bar.setAttribute('aria-label', item.name);
+          bar.style.setProperty('--bar-color', item.value);
+          if (preset === 'pairs') { bar.style.background = item.value; }
+          else { const label = document.createElement('span'); label.textContent = item.name; bar.append(label); }
+          return bar;
+        }));
+        stage.setAttribute('aria-label', preset === 'pairs' ? 'Paired red and cyan, green and magenta, blue and yellow fields' : 'White, yellow, cyan, green, magenta, red, blue, and black vertical color bars');
+        buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.colorPreset === preset)));
+        setStatus(preset === 'pairs' ? 'RGB channel pairs. Compare each primary field with the secondary color formed by the other two channels.' : 'Primary and secondary bars. Check that each field is stable and visibly distinct.');
+      };
+      buttons.forEach((button) => button.addEventListener('click', () => select(button.dataset.colorPreset!)));
+    }
+
+    if (kind === 'white-saturation') {
+      const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-white-range]')];
+      const swatches = root.querySelector<HTMLElement>('[data-white-swatches]')!;
+      const stage = root.querySelector<HTMLElement>('[data-white-stage]')!;
+      const select = (range: string) => {
+        const [from, to] = range.split('-').map(Number);
+        const values = Array.from({ length: to - from + 1 }, (_, index) => from + index);
+        swatches.replaceChildren(...values.map((value) => {
+          const tile = document.createElement('div'); tile.className = 'white-swatch';
+          const chip = document.createElement('span'); chip.className = 'swatch-chip'; chip.style.setProperty('--swatch', `rgb(${value},${value},${value})`);
+          const label = document.createElement('span'); label.className = 'swatch-value'; label.textContent = String(value);
+          tile.append(chip, label); return tile;
+        }));
+        stage.setAttribute('aria-label', `Near-white patches from RGB ${from} through ${to} on a white background`);
+        buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.whiteRange === range)));
+        setStatus(`RGB ${from}–${to} on white. The closest steps are intentionally subtle; keep the screen at its normal white level.`);
+      };
+      buttons.forEach((button) => button.addEventListener('click', () => select(button.dataset.whiteRange!)));
+    }
+
+    if (kind === 'sharpness') {
+      const stage = root.querySelector<HTMLElement>('[data-sharp-stage]')!;
+      const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-sharp-pattern]')];
+      const names: Record<string, string> = { checker: 'Fine checkerboard', vertical: 'Vertical one-pixel lines', horizontal: 'Horizontal one-pixel lines' };
+      const select = (pattern: string) => {
+        stage.dataset.pattern = pattern;
+        stage.setAttribute('aria-label', `${names[pattern]} for monitor sharpness inspection`);
+        buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.sharpPattern === pattern)));
+        setStatus(`${names[pattern]}. Begin at native resolution and 100% browser zoom; operating-system scaling and device pixel ratio still affect the result.`);
+      };
+      buttons.forEach((button) => button.addEventListener('click', () => select(button.dataset.sharpPattern!)));
+    }
+  }
+</script>
+
+<style>
+  .display-check{padding:18px}
+  .display-check-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+  .display-check-controls .button{font-size:.86rem;padding:8px 11px}
+  .display-check-controls [aria-pressed="true"]{background:#d5e9e7;border-color:#8ab9b5}
+  .display-check-stage{height:min(58vh,560px);min-height:300px;position:relative;overflow:hidden;border:1px solid #dce4ea;border-radius:8px;background:#fff}
+  .color-bars-stage{display:grid;grid-template-columns:repeat(8,minmax(0,1fr))}
+  .color-bars-stage[data-layout="pairs"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .color-bar{min-width:0;position:relative;background:var(--bar-color,#fff)}
+  .color-bar>span{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:.76rem;font-weight:750;color:#555;background:rgba(255,255,255,.8);padding:3px 6px;border-radius:4px;white-space:nowrap}
+  .white-stage{display:grid;place-items:center;padding:22px;background:#fff}
+  .white-swatches{width:min(100%,960px);display:grid;grid-template-columns:repeat(10,minmax(30px,1fr));gap:12px 8px;align-content:center}
+  .white-swatch{display:grid;justify-items:center;gap:4px;font-size:.73rem;color:#49576a;font-variant-numeric:tabular-nums}
+  .swatch-chip{display:block;width:100%;aspect-ratio:1;border:1px solid rgba(0,0,0,.09);background:var(--swatch,#f0f0f0)}
+  .swatch-value{line-height:1}
+  .sharpness-stage[data-pattern="checker"]{background:repeating-conic-gradient(#111 0 25%,#fff 0 50%) 0 0/8px 8px}
+  .sharpness-stage[data-pattern="vertical"]{background:repeating-linear-gradient(90deg,#111 0 1px,#fff 1px 2px)}
+  .sharpness-stage[data-pattern="horizontal"]{background:repeating-linear-gradient(0deg,#111 0 1px,#fff 1px 2px)}
+  .display-check-status{margin:12px 0 0;color:var(--muted);font-size:.86rem}
+  .display-check:fullscreen{width:100vw;height:100vh;height:100dvh;max-width:none;margin:0;padding:20px;border:0;border-radius:0;display:flex;flex-direction:column;justify-content:center;box-shadow:none}
+  .display-check:fullscreen .display-check-stage{width:100%;height:auto;min-height:0;flex:1;max-height:calc(100dvh - 110px);border-radius:0}
+  .display-check:fullscreen .white-stage{padding:5vh 5vw}
+  @media(max-width:760px){.display-check-stage{height:48vh;min-height:250px}.white-swatches{grid-template-columns:repeat(5,minmax(30px,1fr));gap:8px}.display-check:fullscreen{padding:12px}.display-check:fullscreen .white-swatches{grid-template-columns:repeat(5,minmax(30px,1fr))}}
+</style>

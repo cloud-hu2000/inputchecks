@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import MonitorPatternTool from '../components/MonitorPatternTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Watch an adjustable high-contrast pattern move across your screen to compare blur and ghosting. Use fullscreen and change one monitor setting at a time.';
+const faq = [
+  { question: 'What should I look for in a motion blur test?', answer: 'Watch the moving target edge and compare how clearly it appears while moving. A browser animation is a visual comparison, not an instrument reading of pixel response time or refresh behavior.' },
+  { question: 'What speed should I use?', answer: 'Start around 480 CSS pixels per second, then compare slower and faster settings that resemble the motion you care about. Keep the pattern, direction, display mode, and viewing position consistent.' },
+  { question: 'Does visible ghosting prove my monitor is faulty?', answer: 'No. Browser frame timing, refresh rate, panel response, overdrive, motion processing, graphics load, and vision all affect the appearance. Compare another mode or display before drawing a conclusion.' },
+];
+const related = [
+  { href: '/dead-pixel-test', title: 'Dead Pixel Test', description: 'Inspect the panel with solid color patterns.', icon: '▦' },
+  { href: '/gray-banding-test', title: 'Gray Banding Test', description: 'Look for steps in grayscale transitions.', icon: '▥' },
+  { href: '/gray-uniformity-test', title: 'Gray Uniformity Test', description: 'Compare gray levels across the screen.', icon: '◩' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Motion Blur Test', url: absoluteUrl('/motion-blur-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Motion Blur Test: Check Monitor Ghosting" {description} path="/motion-blur-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Motion Blur Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Motion Blur Test</h1>
+    <p>Watch a high-contrast target move at adjustable speeds and compare how motion looks on your display.</p>
+  </section>
+  <MonitorPatternTool kind="motion-blur" />
+  <article class="content">
+    <h2>How to use this motion blur test</h2>
+    <p>Press Start motion and watch the black-and-white target as it crosses the patterned track. Begin around 480 CSS pixels per second, then use the speed slider to compare a slower and faster pass. Change direction if the movement is easier to follow the other way. Full screen provides a larger viewing area; press Escape or use Exit full screen to return. Pause the animation before changing other monitor settings so you can make one change at a time.</p>
+    <p>For a useful comparison, sit at a normal distance and follow the target with your eyes without moving your head. Notice whether its edges remain distinct or appear smeared, doubled, or followed by a faint trail. Repeat the same speed and direction after each setting change. The slider reports CSS pixels per second for this browser pattern, not the physical speed of an object on every monitor. Screen size, scaling, and display density affect the apparent movement.</p>
+
+    <h2>What motion blur and ghosting mean</h2>
+    <p>Motion blur describes loss of edge clarity while an object is moving. A moving image can look less sharp even when the display is working as designed, because pixels take time to change and because the eye follows motion across frames that are held on the screen. Ghosting is commonly used for a visible trailing or repeated edge behind a moving object. Similar artifacts can come from panel response, overdrive behavior, refresh timing, frame delivery, motion processing, or the rendered content.</p>
+    <p>This page creates a simple animated high-contrast pattern in the browser so you can compare one setup with another. It does not generate a precisely synchronized camera exposure or measure pixel transitions. The <a href="https://www.w3.org/TR/css-animations-1/" rel="noopener noreferrer">W3C CSS Animations specification</a> defines how web animations are presented by a browser, but it cannot guarantee a particular frame cadence on a loaded device. Treat what you see as a qualitative observation for this browser and display combination.</p>
+
+    <h2>Choose a repeatable speed</h2>
+    <p>Different movement speeds emphasize different visual effects. A slower pass gives you time to inspect the shape; a faster pass can make trails or loss of clarity more apparent. There is no single speed that represents every game, video, or desktop task. Choose one that resembles the motion you are troubleshooting and keep it fixed for each comparison. If you want a quick baseline, start at 480 CSS pixels per second and then compare nearby slider settings.</p>
+    <p>The number shown is a setting for the CSS animation distance and duration. It is not a measured refresh rate, frame rate, response time, or pursuit-camera result. The browser may schedule frames differently when the tab is hidden, the system is under load, or the display refresh mode changes. Keep this tab in the foreground, allow the pattern to run smoothly, and repeat the same pass if another app or notification interrupted it.</p>
+
+    <h2>Compare display settings carefully</h2>
+    <p>Change one display control at a time. If you are checking overdrive or response-time settings, compare each available level using the same speed, direction, and viewing position. Stronger overdrive can reduce some trails but may introduce bright or dark overshoot; this browser tool cannot name or score that behavior reliably. Motion smoothing, backlight strobing, variable refresh rate, HDR, and game modes can also alter what you see. Note the setting name and whether the change improved the specific motion you care about.</p>
+    <p>Use the display's recommended resolution and refresh mode when establishing a baseline. If your computer offers multiple refresh rates, select the mode you normally use before comparing. A dock, adapter, remote desktop, capture path, or power-saving mode can affect frame delivery. For a fair check, keep the signal path constant and avoid changing a graphics setting and a monitor control in the same pass.</p>
+
+    <h2>Understand browser and display limits</h2>
+    <p>A browser animation passes through page rendering, the operating system compositor, graphics hardware, and the display. The browser does not read the monitor's pixel response specification, overdrive state, or actual panel refresh behavior. This page also does not use a high-speed camera, photodiode, or calibrated motion benchmark. Therefore, a visible trail is not proof of a faulty monitor, and a clean appearance does not prove that a display meets a particular response-time claim.</p>
+    <p>Fullscreen mode asks the browser to enlarge the tool for a closer view. The <a href="https://fullscreen.spec.whatwg.org/" rel="noopener noreferrer">Fullscreen API standard</a> defines this user-initiated page capability; it does not lock refresh rate or bypass the graphics pipeline. If full screen is unavailable, the pattern still runs in the tester card. For formal response-time or motion-resolution measurements, use a test method designed around the required camera, photodiode, or timing equipment.</p>
+
+    <h2>When a motion pattern looks uneven</h2>
+    <p>If the target jumps instead of moving smoothly, keep the tab visible and close demanding background applications before repeating. Check that the computer is not in a low-power mode and that the browser is not throttling a background tab. Try another current browser using the same display settings. A change that appears only in one browser or under heavy system load may be related to frame scheduling rather than panel response.</p>
+    <p>If trails change when you alter a monitor setting, repeat the comparison several times and return to the original setting once. Look for a consistent difference rather than a single frame or brief visual impression. If only a particular game or video looks blurry, inspect its frame rate, motion blur effect, scaling, and connection path separately. A browser pattern is a starting point for comparison, not a substitute for troubleshooting the application where the symptom occurs.</p>
+
+    <h2>Related display checks</h2>
+    <p>For static panel observations, use the <a href="/dead-pixel-test">Dead Pixel Test</a>, the <a href="/gray-banding-test">Gray Banding Test</a>, or the <a href="/gray-uniformity-test">Gray Uniformity Test</a>. They inspect solid colors, gradients, and flat gray fields. Motion blur is a separate visual question, so compare the pages independently instead of combining their observations into a hardware score.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

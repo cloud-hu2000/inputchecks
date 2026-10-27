@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import DisplayCheckTool from '../components/DisplayCheckTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Check primary and secondary color fields in your browser to spot obvious channel, tint, or clipping issues. This visual check does not measure color accuracy.';
+const faq = [
+  { question: 'What should I look for on a color bars test?', answer: 'Look for a field that is missing, unstable, visibly tinted, or very different from the expected neighboring fields. Compare another browser or input before deciding where the issue originates.' },
+  { question: 'Can color bars calibrate my monitor?', answer: 'No. The pattern can reveal obvious visual channel problems, but it cannot measure color gamut, white point, chromaticity, or Delta E. Quantitative calibration needs reference targets and suitable measuring equipment.' },
+  { question: 'Why do these bars look different on another screen?', answer: 'Monitor gamut, color profiles, operating-system processing, brightness, contrast, and viewing conditions vary. Saturation alone is not evidence that one display is more accurate.' },
+];
+const related = [
+  { href: '/white-saturation-test', title: 'White Saturation Test', description: 'Inspect separation among near-white tones.', icon: '◻' },
+  { href: '/monitor-sharpness-test', title: 'Monitor Sharpness Test', description: 'Check fine patterns for scaling and edge artifacts.', icon: '▦' },
+  { href: '/dead-pixel-test', title: 'Dead Pixel Test', description: 'Inspect the panel with solid-color patterns.', icon: '◩' },
+  { href: '/gray-banding-test', title: 'Gray Banding Test', description: 'Look for abrupt steps in grayscale gradients.', icon: '▥' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Color Bars Test', url: absoluteUrl('/color-bars-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Color Bars Test – Check Display Channels" {description} path="/color-bars-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Color Bars Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Color Bars Test</h1>
+    <p>Compare primary and secondary color fields to look for obvious channel, tint, or stability issues.</p>
+  </section>
+  <DisplayCheckTool kind="color-bars" />
+  <article class="content">
+    <h2>How to use this color bars test</h2>
+    <p>Begin with Primary and secondary bars. The screen displays white, yellow, cyan, green, magenta, red, blue, and black fields. Look across the complete display and check whether each bar is stable and clearly different from its neighbors. Select RGB channel pairs to compare red with cyan, green with magenta, and blue with yellow. Use Full screen to make the pattern larger, and exit before adjusting monitor controls. If a field flickers, changes color, or seems absent, repeat the view before recording what happened.</p>
+    <p>Keep your usual display mode and signal path for a first pass. If you are comparing two inputs or presets, show the same pattern on each and change only one condition at a time. A short note such as “blue and cyan look unusually dim on HDMI 2” is more useful than a general impression that colors seem wrong. Confirm any unexpected result with normal content and, when possible, a second source device or cable.</p>
+
+    <h2>What color bars can reveal</h2>
+    <p>Large, separate color fields make major differences easy to see. A missing or weak red, green, or blue output can affect both its primary field and secondary combinations that use that channel. For example, blue contributes to cyan, magenta, and white. Comparing related colors can help you describe which portions of the pattern look affected. Unexpected tint across neutral white may suggest a broader color balance issue, while changing or flickering bars may point to a signal or display stability problem.</p>
+    <p>Color bars are a simple visual check, not a complete diagnostic signal. The <a href="https://www.itu.int/rec/R-REC-BT.2111/en" rel="noopener noreferrer">ITU-R Recommendation BT.2111</a> specifies formal color-bar patterns for HDR television systems with defined signal formats and code values. This browser tool does not claim to reproduce or certify that broadcast test pattern. It uses ordinary web colors to provide a quick comparison of primary and secondary fields.</p>
+
+    <h2>Read primary and secondary colors together</h2>
+    <p>The primary colors exercise individual red, green, and blue components strongly. The secondary colors combine two of those components: cyan combines green and blue, magenta combines red and blue, and yellow combines red and green. White combines all three. When one channel looks abnormal, compare the related secondary fields and white rather than relying on a single patch. This comparison can help locate a pattern for further troubleshooting, but it cannot isolate the cable, graphics hardware, monitor input, color mode, or panel by itself.</p>
+    <p>The paired view groups each primary with its complementary color. It can make a gross channel difference easier to describe, but the two halves are not measurement references. Perceived brightness varies among colors, and equal RGB code values do not appear equally bright to the eye. Avoid judging accuracy by which bar looks most vivid or by comparing a phone camera image of the display; exposure and white balance can change the captured colors.</p>
+
+    <h2>Check the whole signal path</h2>
+    <p>A browser color travels through page rendering, browser color management, the operating system, graphics output, cable or adapter, monitor input processing, and the display panel. Each part can affect what you see. Before changing a monitor, compare another browser and another input if available. Check that temporary night-light filters, color overlays, HDR conversion, and vendor enhancement modes are not active unless one of those features is what you want to inspect.</p>
+    <p>Keep resolution, refresh mode, monitor preset, and room lighting consistent during a comparison. If only one cable or port shows a missing-looking color, repeat the test through a known-good connection before assuming the screen is involved. If the pattern looks normal but a particular application appears tinted, review that application's color settings, profile handling, and image source. Browser bars can narrow an observation; they cannot provide a definitive hardware fault code.</p>
+
+    <h2>Color bars do not measure accuracy</h2>
+    <p>This page cannot report gamut coverage, Delta E, white point, chromaticity, gamma, or calibration quality. It does not have a reference sensor and does not read the monitor's internal controls. A wide-gamut screen may make saturated colors look more intense without being more accurate for a target color space. Conversely, a visually restrained preset may be closer to the intended output even if its bars seem less vivid.</p>
+    <p>For color-critical work, use a color-managed workflow and suitable measurement hardware. The browser pattern is most useful for spotting large differences, checking whether a setting change is repeatable, or comparing sources under the same conditions. Treat an unusual field as a clue to investigate. Do not use the page alone to approve a broadcast chain, grade professional footage, or decide that a display meets a calibration specification.</p>
+
+    <h2>Related display tests</h2>
+    <p>Use the <a href="/white-saturation-test">White Saturation Test</a> to inspect bright tonal separation, the <a href="/monitor-sharpness-test">Monitor Sharpness Test</a> for fine detail and scaling, or the <a href="/dead-pixel-test">Dead Pixel Test</a> for point defects. The <a href="/gray-banding-test">Gray Banding Test</a> checks tonal transitions. Each pattern answers a different visual question.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

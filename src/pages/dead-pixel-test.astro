@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import MonitorPatternTool from '../components/MonitorPatternTool.astro';
+import NewToolRelatedTests from '../components/NewToolRelatedTests.astro';
+import FAQ from '../components/FAQ.astro';
+import JsonLd from '../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../config';
+
+const description = 'Check your screen for dead or stuck pixels with fullscreen color patterns. Switch colors manually or cycle them automatically to inspect the panel safely.';
+const faq = [
+  { question: 'How can I tell a dead pixel from a stuck pixel?', answer: 'A pixel that remains dark on bright patterns may be described as dead, while one that stays bright or holds a color on changing patterns may be stuck. A browser test can show a visible difference, but cannot identify the panel circuitry or confirm a repair category.' },
+  { question: 'Can this test repair a stuck pixel?', answer: 'No. This page only displays colors for visual inspection. It does not send a repair signal or guarantee that a pixel will change. Avoid pressing the screen or using unverified flashing tools, which may damage a panel or cause discomfort.' },
+  { question: 'Why should I test more than one color?', answer: 'A pixel can blend into one background and stand out against another. Checking white, black, red, green, blue, cyan, magenta, and yellow gives you several contrasting views, but some pixel defects may still be difficult to see.' },
+];
+const related = [
+  { href: '/gray-banding-test', title: 'Gray Banding Test', description: 'Inspect grayscale gradients and near-black steps.', icon: '▥' },
+  { href: '/gray-uniformity-test', title: 'Gray Uniformity Test', description: 'Compare brightness and tint across gray fields.', icon: '◩' },
+  { href: '/motion-blur-test', title: 'Motion Blur Test', description: 'Observe a moving high-contrast pattern.', icon: '↔' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Dead Pixel Test', url: absoluteUrl('/dead-pixel-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Dead Pixel Test: Find Stuck Pixels Online" {description} path="/dead-pixel-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Dead Pixel Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Dead Pixel Test</h1>
+    <p>Inspect your display with solid colors and look for pixels that remain different from the surrounding screen.</p>
+  </section>
+  <MonitorPatternTool kind="dead-pixel" />
+  <article class="content">
+    <h2>How to use this dead pixel test</h2>
+    <p>Start with the white pattern, then use Next to move through black, red, green, blue, cyan, magenta, and yellow. Pause on each color long enough to scan the entire display. Look for an individual dot that stays dark, bright, or a different color while the surrounding area changes. You can also choose Start auto cycle to advance about every two seconds. Stop the cycle whenever you want a longer look. Use Full screen to remove most page distractions; press Escape or use the on-screen button to return.</p>
+    <p>For a careful check, sit at your normal viewing distance and inspect the center, edges, and corners. Keep your gaze moving rather than staring at one pixel for a long time. The large patterns make small differences easier to spot, but do not zoom the browser during a comparison because zooming changes the relationship between a CSS pixel and a physical display pixel. If you find a possible defect, return to the same color and position to see whether it is repeatable.</p>
+
+    <h2>What a dead pixel test can show</h2>
+    <p>A flat color removes most image detail, making a pixel that differs from its neighbors easier to notice. A pixel that stays black on a bright field may be described as a dead or dark pixel. A pixel that remains lit or holds one color while the background changes may be described as stuck. The exact terms and acceptance rules can vary by panel technology, manufacturer, product line, and warranty policy. This browser page does not inspect subpixels electrically, so treat the visible spot as an observation to document rather than a confirmed service classification.</p>
+    <p>Pixels are made from red, green, and blue subpixels, so a defect may show on one color more clearly than another. That is why this tool cycles through several primary and combined colors. A pixel can appear normal on a field close to its stuck color and stand out on a contrasting field. The displayed colors are defined by browser styles; the <a href="https://www.w3.org/TR/css-color-4/" rel="noopener noreferrer">W3C CSS Color specification</a> describes how CSS color values are represented. Your display profile, browser color handling, graphics pipeline, and panel can all affect the final appearance.</p>
+
+    <h2>Prepare the screen before checking pixels</h2>
+    <p>Clean only dust or smudges that could be mistaken for a pixel, following the monitor maker's cleaning instructions. Turn off a screen saver, animated wallpaper, and other overlays, then set the browser tab to a comfortable zoom. Avoid changing brightness, contrast, color temperature, or HDR settings halfway through a pass. A calm room with moderate lighting makes small points easier to compare; direct reflections can hide a defect or create a bright spot that is not part of the image.</p>
+    <p>If you use more than one monitor, drag this page to the display you want to inspect before starting full screen. Check that the browser is not on a different display than expected. Laptop screens can look different when viewed from an angle, so look straight at the panel first and then repeat at your usual working posture. Keep notes about the color where the spot appeared and its approximate screen position. A photo may help describe the issue to support, but camera artifacts such as moiré can create apparent pixel patterns.</p>
+
+    <h2>Separate a screen pixel from dust or image artifacts</h2>
+    <p>A speck of dust on the panel surface does not change color when the pattern changes, while a pixel-level image difference usually responds to at least some backgrounds. Do not press or rub the screen to investigate. If the mark appears only in a video, game, or application, capture the same area on a different display or open a plain color pattern before concluding that the panel is involved. If it appears in a screenshot viewed on another screen, the mark is part of the rendered image rather than a single physical pixel on the original display.</p>
+    <p>Repeat the pattern sequence after refreshing the page or restarting the browser if the result is uncertain. A graphics overlay, browser extension, remote desktop session, or scaling mode can alter what appears on screen. If the same location looks different on multiple solid colors and in another browser, record the conditions and check the support policy for your exact monitor model. Pixel policies are model-specific; this page cannot tell you whether a manufacturer will accept a warranty claim.</p>
+
+    <h2>Browser limits and safe interpretation</h2>
+    <p>This dead pixel test is a visual aid, not an automated pixel detector. It does not take a screenshot, request camera access, upload an image, or inspect the physical panel. The result depends on what you can see and on the monitor, operating system, browser, color settings, ambient light, and viewing angle. A panel may have subpixel behavior or defects that are not visible with these patterns. Conversely, a harmless reflection or surface mark may look like a defect.</p>
+    <p>Full screen is an optional browser feature and normally requires a deliberate click. The browser's <a href="https://fullscreen.spec.whatwg.org/" rel="noopener noreferrer">Fullscreen API standard</a> defines the page's request to display a chosen element across the screen; the browser still controls when that request is allowed. If full screen is unavailable, use the patterns in the page as they are. Never interpret this tool as a certified calibration, hardware diagnosis, or warranty decision.</p>
+
+    <h2>Related display checks</h2>
+    <p>After inspecting individual pixels, use the <a href="/gray-banding-test">Gray Banding Test</a> for smooth grayscale transitions or the <a href="/gray-uniformity-test">Gray Uniformity Test</a> for broad brightness and tint variation. To inspect a moving pattern, open the <a href="/motion-blur-test">Motion Blur Test</a>. Each page shows a different browser pattern and should be considered separately.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>
