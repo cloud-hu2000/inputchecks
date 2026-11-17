@@ -16,6 +16,7 @@ const inputTools = [
 
 const pathname = Astro.url.pathname;
 const isInputTool = inputTools.some((tool) => tool.href === pathname);
+const isRefreshTool = pathname === '/refresh-rate-test' || pathname === '/refresh-rate-test/';
 ---
 
 <header class="site-header">
@@ -46,6 +47,19 @@ const isInputTool = inputTools.some((tool) => tool.href === pathname);
           <div class="tool-menu tool-menu--empty"><span class="tool-menu-icon" aria-hidden="true">+</span><div><strong>{category} tests are coming soon</strong><p>This category is ready for new tools as they are added.</p></div></div>
         </details>
       ))}
+      <details class="category-menu">
+        <summary class:list={{ active: isRefreshTool }}><span>Display tests</span><svg viewBox="0 0 12 8" aria-hidden="true"><path d="m1 1.5 5 5 5-5" /></svg></summary>
+        <div class="tool-menu" role="group" aria-label="Display tests">
+          <div class="tool-menu-heading"><span class="tool-menu-kicker">Display tests</span><strong>Choose a test</strong></div>
+          <div class="tool-menu-list">
+            <a class:list={{ 'tool-menu-item': true, current: isRefreshTool }} href="/refresh-rate-test">
+              <span class="tool-menu-icon" aria-hidden="true">↻</span>
+              <span><strong>Refresh Rate Test</strong><small>Estimate browser frame intervals.</small></span>
+              <span class="tool-menu-arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </details>
     </nav>
   </div>
 </header>

@@ -1,0 +1,27 @@
+<section class="tester refresh-tester" data-refresh-tester>
+  <div class="refresh-controls">
+    <button class="button primary" type="button" data-refresh-toggle aria-pressed="false">Start test</button>
+    <button class="button text-button" type="button" data-refresh-reset>Reset test</button>
+  </div>
+  <div class="metrics">
+    <div><span>Frame-interval estimate</span><strong data-refresh-hz>—</strong></div>
+    <div><span>Frames</span><strong data-refresh-frames>0</strong></div>
+    <div><span>Duration</span><strong data-refresh-duration>—</strong></div>
+    <div><span>Min interval</span><strong data-refresh-min>—</strong></div>
+    <div><span>Median interval</span><strong data-refresh-median>—</strong></div>
+    <div><span>Max interval</span><strong data-refresh-max>—</strong></div>
+  </div>
+  <p class="refresh-status" data-refresh-status aria-live="polite">Press Start test. Keep this tab visible while frames are sampled.</p>
+  <p class="callout" data-refresh-disclaimer>This is a browser requestAnimationFrame frame-interval estimate. It is not the monitor EDID or panel refresh rate, and it is not a hardware specification. Tab throttling, power saving, vsync, the browser, and system load can all change the intervals.</p>
+</section>
+<script src="./refresh-rate/client.ts"></script>
+<style>
+  .refresh-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  .refresh-controls .text-button { margin-top: 0; }
+  .refresh-tester .metrics { grid-template-columns: repeat(3, 1fr); }
+  .refresh-tester .metrics strong { white-space: normal; }
+  .refresh-status { margin: 0 0 12px; color: var(--muted); font-size: .92rem; }
+  @media (max-width: 760px) {
+    .refresh-tester .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

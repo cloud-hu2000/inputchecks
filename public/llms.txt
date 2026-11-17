@@ -15,6 +15,7 @@ InputChecks helps visitors check common input symptoms with focused, no-account 
 - [Keyboard Test](https://inputchecks.com/keyboard-test): Check whether individual key presses reach the focused browser tab.
 - [Keyboard Ghosting Test](https://inputchecks.com/keyboard-ghosting-test): View simultaneous key combinations received by the browser.
 - [Spacebar Test](https://inputchecks.com/spacebar-test): Count distinct Space key presses in a focused test panel.
+- [Browser Refresh Rate Test](https://inputchecks.com/refresh-rate-test): Estimate a display refresh rate from requestAnimationFrame intervals. This is a frame-timing estimate, not an EDID or panel specification.
 
 ## Guides
 
