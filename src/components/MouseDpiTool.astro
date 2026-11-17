@@ -1,0 +1,74 @@
+<section class="tester dpi-tester" data-dpi-tester>
+  <form class="dpi-form" data-dpi-form novalidate>
+    <div class="dpi-fields">
+      <label>
+        Physical distance
+        <input name="physicalDistance" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-required="true" data-dpi-distance />
+      </label>
+      <label>
+        Unit
+        <select name="unit" data-dpi-unit>
+          <option value="in" selected>Inches</option>
+          <option value="cm">Centimeters</option>
+          <option value="mm">Millimeters</option>
+        </select>
+      </label>
+      <label>
+        On-screen travel (CSS pixels)
+        <input name="pixelTravel" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-required="true" data-dpi-pixels />
+      </label>
+    </div>
+    <div class="dpi-pad" data-dpi-pad role="region" aria-label="Drag pad for on-screen travel">
+      <span>Drag to fill pixel travel. Marks are 50 CSS px apart.</span>
+      <strong data-dpi-pad-readout>0 CSS px</strong>
+    </div>
+    <fieldset class="dpi-optional">
+      <legend>Optional eDPI factors</legend>
+      <div class="dpi-fields">
+        <label>
+          DPI
+          <input name="dpi" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-dpi-native />
+        </label>
+        <label>
+          Sensitivity
+          <input name="sensitivity" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-dpi-sensitivity />
+        </label>
+      </div>
+    </fieldset>
+    <div class="dpi-controls">
+      <button class="button primary" type="submit">Calculate</button>
+      <button class="button text-button" type="button" data-dpi-reset>Reset test</button>
+    </div>
+  </form>
+  <div class="metrics">
+    <div><span>Effective DPI</span><strong data-dpi-effective>—</strong></div>
+    <div><span>Inches used</span><strong data-dpi-inches>—</strong></div>
+    <div><span>eDPI</span><strong data-dpi-edpi>—</strong></div>
+  </div>
+  <p class="dpi-status" data-dpi-status role="status">Enter a physical distance and the on-screen travel in CSS pixels, then press Calculate. You can drag the pad to fill travel from the pointer path.</p>
+  <p class="callout" data-dpi-disclaimer>The browser cannot auto-read real hardware or sensor DPI. Results depend on your measurements, OS cursor settings, and display scaling. This is not a sensor specification reading.</p>
+</section>
+<script src="./mouse-dpi/client.ts"></script>
+<style>
+  .dpi-fields { display: grid; grid-template-columns: 1.5fr 0.9fr 1.5fr; gap: 8px 12px; }
+  .dpi-fields label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: .82rem; font-weight: 650; }
+  .dpi-fields input,
+  .dpi-fields select { width: 100%; font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .dpi-fields input[aria-invalid="true"],
+  .dpi-fields select[aria-invalid="true"] { border-color: var(--danger); }
+  .dpi-pad { margin-top: 10px; min-height: 72px; border: 1px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; touch-action: none; cursor: crosshair; user-select: none; background-color: var(--canvas); background-image: repeating-linear-gradient(to right, transparent 0 49px, var(--line) 49px 50px); }
+  .dpi-pad span { color: var(--ink); font-size: .9rem; max-width: 46ch; }
+  .dpi-pad strong { font-size: .95rem; white-space: nowrap; }
+  .dpi-optional { border: 0; margin: 10px 0 0; padding: 0; min-inline-size: 0; }
+  .dpi-optional legend { padding: 0; margin: 0 0 6px; color: var(--muted); font-size: .82rem; }
+  .dpi-optional .dpi-fields { grid-template-columns: 1fr 1fr; }
+  .dpi-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 12px; }
+  .dpi-controls .text-button { margin-top: 0; }
+  .dpi-tester .metrics { grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
+  .dpi-tester .metrics strong { white-space: normal; }
+  .dpi-status { margin: 0 0 12px; color: var(--muted); font-size: .92rem; }
+  @media (max-width: 760px) {
+    .dpi-fields, .dpi-optional .dpi-fields { grid-template-columns: 1fr; }
+    .dpi-pad { align-items: flex-start; flex-direction: column; }
+  }
+</style>
