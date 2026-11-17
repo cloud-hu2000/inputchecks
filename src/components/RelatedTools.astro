@@ -13,6 +13,7 @@ const tools = {
   spacebar: { href: '/spacebar-test', title: 'Spacebar Test', description: 'Check every spacebar press.', icon: '▁' },
   reaction: { href: '/reaction-time-test', title: 'Reaction Time Test', description: 'Measure visual reaction time.', icon: '◌' },
   refresh: { href: '/refresh-rate-test', title: 'Refresh Rate Test', description: 'Estimate browser frame intervals.', icon: '↻' },
+  touch: { href: '/touch-screen-test', title: 'Touch Screen Test', description: 'Record browser touch contacts.', icon: '⧉' },
 } as const;
 const related: Record<string, Array<keyof typeof tools>> = {
   wheel: ['mouse', 'polling', 'double', 'keyboard'], mouse: ['wheel', 'double', 'polling', 'keyboard'],
@@ -21,6 +22,7 @@ const related: Record<string, Array<keyof typeof tools>> = {
   ghosting: ['keyboard', 'spacebar', 'cps', 'mouse'], spacebar: ['keyboard', 'ghosting', 'cps', 'reaction'],
   reaction: ['cps', 'double', 'keyboard', 'mouse'],
   refresh: ['polling', 'reaction', 'mouse', 'cps'],
+  touch: ['mouse', 'polling', 'keyboard', 'reaction'],
 };
 const troubleshooting: Record<string, Array<{ href: string; title: string }>> = {
   wheel: [

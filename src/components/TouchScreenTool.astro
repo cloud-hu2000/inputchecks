@@ -1,0 +1,85 @@
+---
+import { GRID_COLUMNS, GRID_ROWS } from './touch-screen/contacts';
+
+const cells = Array.from({ length: GRID_COLUMNS * GRID_ROWS }, (_, index) => {
+  const column = index % GRID_COLUMNS;
+  const row = Math.floor(index / GRID_COLUMNS);
+  return `${column},${row}`;
+});
+---
+
+<section class="tester touch-tester" data-touch-tester>
+  <div class="touch-toolbar">
+    <button class="button primary" type="button" data-touch-reset>Reset test</button>
+  </div>
+  <div
+    class="touch-surface"
+    data-touch-surface
+    role="region"
+    aria-label="Touch test surface"
+    style={`--touch-columns:${GRID_COLUMNS};--touch-rows:${GRID_ROWS};`}
+  >
+    <div class="touch-grid" aria-hidden="true">
+      {cells.map((key) => <div class="touch-cell" data-cell={key}></div>)}
+    </div>
+    <div class="touch-markers" data-touch-markers></div>
+  </div>
+  <div class="metrics">
+    <div><span>Current contacts</span><strong data-touch-current>0</strong></div>
+    <div><span>Max simultaneous</span><strong data-touch-max>0</strong></div>
+    <div><span>Hit regions</span><strong data-touch-hit>0</strong></div>
+    <div><span>Unhit regions</span><strong data-touch-unhit-count>—</strong></div>
+  </div>
+  <p class="touch-list" data-touch-list aria-live="polite">No active touch contacts.</p>
+  <p class="touch-status" data-touch-status aria-live="polite">Place one or more fingers on the test surface. Contacts appear only when this browser delivers touch events.</p>
+  <p data-touch-capability>A browser that reports no touch points, or only a mouse or hover-only pointer, cannot complete a real multi-touch hardware check.</p>
+  <p data-touch-unhit>No in-bounds touch has been stored yet, so unhit regions are not listed.</p>
+  <p class="callout" data-touch-disclaimer>This records touch events the browser delivers to this page. It is not a hardware certification or a factory calibration. Desktop, no-touch-screen, and hover-only pointers are unsupported for a real multi-touch hardware check.</p>
+</section>
+<script src="./touch-screen/client.ts"></script>
+<style>
+  .touch-toolbar { display: flex; justify-content: flex-start; margin: 0 0 8px; }
+  .touch-toolbar .button { margin: 0; }
+  .touch-surface {
+    position: relative;
+    min-height: 240px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--canvas);
+    touch-action: none;
+    overflow: hidden;
+    user-select: none;
+  }
+  .touch-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--touch-columns), 1fr);
+    grid-template-rows: repeat(var(--touch-rows), 1fr);
+  }
+  .touch-cell { border: 1px solid rgba(23, 35, 51, .06); }
+  .touch-cell.is-hit { background: rgba(23, 107, 103, .28); }
+  .touch-cell.is-unhit { background: rgba(194, 65, 58, .08); }
+  .touch-markers { position: absolute; inset: 0; pointer-events: none; }
+  .touch-dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+  }
+  .touch-tester .metrics { grid-template-columns: repeat(4, 1fr); margin-top: 12px; }
+  .touch-list, .touch-status { margin: 0 0 8px; color: var(--muted); font-size: .92rem; }
+  .touch-tester [data-touch-capability],
+  .touch-tester [data-touch-unhit] { margin: 0 0 8px; font-size: .92rem; }
+  @media (max-width: 760px) {
+    .touch-tester .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import TouchScreenTool from '../../components/TouchScreenTool.astro';
+import NewToolRelatedTests from '../../components/NewToolRelatedTests.astro';
+import FAQ from '../../components/FAQ.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../../config';
+
+const description = 'Record the touch contacts this browser receives, with identifiers, positions, and unhit areas of the test surface. This is not a hardware certification.';
+const faq = [
+  { question: 'Does this touch screen test certify the digitizer?', answer: 'No. It records touch events this browser delivers to the page: identifiers, positions on the test surface, and how many contacts were active together. It does not read a factory calibration, and it does not issue a hardware verdict.' },
+  { question: 'Why can a desktop browser not complete a multi-touch check?', answer: 'A desktop session often reports maxTouchPoints as 0 and sends mouse or hover-only pointers. Those pointers are labeled unsupported for a real multi-touch hardware check. They do not increase the contact count.' },
+  { question: 'What does an unhit region mean?', answer: 'After at least one cell of the test surface has received a touch event, cells with no event are listed as unhit. That describes this canvas during this visit. It is not a diagnosis of a broken panel.' },
+  { question: 'Why might two fingers arrive as one contact?', answer: 'The page can only count contacts in the browser’s touch list. Palm rejection, a glove, two fingers close together, or the browser itself can merge or split contacts. Repeat the gesture after Reset test before you treat one number as stable.' },
+];
+const related = [
+  { href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons, movement, and wheel input.', icon: '◉' },
+  { href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate pointer-event timing, a different question.', icon: '⌁' },
+  { href: '/keyboard-test', title: 'Keyboard Test', description: 'Check keys that reach this browser tab.', icon: '⌨' },
+  { href: '/reaction-time-test', title: 'Reaction Time Test', description: 'Time a click after a visual cue.', icon: '◌' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Touchscreen Multi-Touch Test', url: absoluteUrl('/touch-screen-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Touch Screen Test: Multi-Touch Contacts" {description} path="/touch-screen-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Touch Screen Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Touchscreen Multi-Touch Test</h1>
+    <p>Count each touch contact this browser is delivering, including its identifier and position on the test surface.</p>
+  </section>
+  <TouchScreenTool />
+  <article class="content">
+    <h2>How to use this touchscreen multi-touch test</h2>
+    <p>Open this page on the device you want to observe and place one or more fingers on the test surface. The surface is the large panel in the tool. Each contact the browser reports should appear as a numbered mark, and the current-contacts figure should match how many contacts are active at that moment. Lift one finger and the current count should fall. The max-simultaneous figure stays at the highest count stored in this session until you press Reset test. Reset clears the marks, the counts, the hit map, and the unhit summary so the next try starts from an empty session.</p>
+    <p>Move a finger slowly across the surface. The mark should follow the positions the browser sends. If you are using a mouse, a trackpad click that the browser reports as a mouse pointer, or a hover-only pen mode, the page says that input is not a touch contact. Those pointers can move a cursor without the browser creating a multi-touch contact list. Read the capability line before you interpret a zero. It states the <code>maxTouchPoints</code> value this browser exposes. That value is the number of simultaneous touch points the browser claims to support. It is not a measurement this page made of the glass.</p>
+    <p>For a repeatable note, press Reset test, place the same fingers again, and write down the identifiers as well as the max. A single busy moment, a notification gesture, or a finger that slipped off the rectangle can change the list. Compare two tries that used the same gesture before you describe the session to someone else.</p>
+
+    <h2>What the browser actually receives</h2>
+    <p>A touch screen test on a web page can only see the events the browser chooses to deliver. When a finger meets the glass, the operating system, the digitizer, and the browser decide whether that contact becomes a script-visible event. This page listens for <code>touchstart</code>, <code>touchmove</code>, <code>touchend</code>, and <code>touchcancel</code>. It reads each contact’s identifier and its position relative to the test surface. The identifier is the number the browser assigns so later events can be tied to the same contact. Coordinates are CSS pixels from the top-left of the surface in this tab, after the page subtracts the surface’s position on screen. They are not millimeters, and they are not a factory calibration grid.</p>
+    <p>The <a href="https://www.w3.org/TR/touch-events/" rel="noopener noreferrer">Touch Events specification</a> describes a list of touch points, each with an identifier that stays the same while that contact is active, plus coordinates. This page stores the identifier and the surface-relative position. It does not store a pass or fail flag. If the coordinates are missing or are not finite numbers, the sample is rejected and the previous contacts stay as they were. A rejected sample is not counted as a successful multi-touch reading. The same stored numbers always produce the same contact list. Nothing on the page invents a contact that the browser did not send.</p>
+    <p>Positions that fall outside the surface rectangle are not given a grid cell. A contact that starts off the panel and then slides in is marked only where an in-bounds position was actually stored. That rule keeps the map tied to this rectangle rather than to the whole screen.</p>
+
+    <h2>Simultaneous contacts are a browser list</h2>
+    <p>Max simultaneous is the largest number of active touch contacts in one sample during this session. If you put down three fingers and the browser’s touch list contains three points, the current count is three and the max becomes three if it was lower. When one finger lifts, the current count drops and the max stays. That peak is a count of contacts in the events we stored. It is not proof that the digitizer supports a particular number of fingers, and it is not proof that each contact was a separate finger. Palm rejection, gloves, a stylus, a case, water on the glass, and the browser itself can add or drop contacts. Two fingers close together may arrive as one contact. A palm may arrive as an extra contact. Quote the identifiers and the max together if you describe a session, and repeat the gesture after Reset test before you treat the number as stable.</p>
+    <p>A single contact is a valid sample. Zero contacts is also an honest sample: it means this page has not stored a touch event yet, or every contact has ended or been cancelled. Neither result is a hardware verdict. The page will not relabel a zero as a failure, and it will not relabel a high count as a certification. Both are descriptions of the event list.</p>
+    <p>Identifiers can be reused after a contact ends. When that happens, the new active point uses the identifier the browser sent, and the earlier end or cancel remains in the history for this session until you reset. Read the active list for what is touching the surface now, and read the max for the peak, not for a permanent property of the device.</p>
+
+    <h2>Desktop, no-touch-screen, and hover-only pointers</h2>
+    <p>Some browsers run on a computer with no touch digitizer. In that case the browser often reports <code>maxTouchPoints</code> as 0, and pointer events that do arrive are typically mouse or another hover-only type. This page labels that state as unsupported for a real multi-touch hardware check. You can still read the capability line, and you can still press Reset test. A click or a hover on the surface is classified as a non-touch pointer. It does not increase the contact count, it does not move the max, and it must not be described as a completed multi-touch check.</p>
+    <p>If the browser reports a <code>maxTouchPoints</code> value above zero, the page says so. That number comes from the browser, not from a lab measurement performed here. It means the browser claims the device can produce that many simultaneous touch points. It does not mean this session has already verified them. Only contacts that show up in the list were actually received. A phone or tablet is the usual place to exercise several fingers. A desktop browser, a remote-desktop session, or a device with touch disabled in system settings can honestly remain at zero contacts. Do not treat that zero as a failed panel.</p>
+    <p>A pen pointer is not counted as a multi-touch finger either. The page classifies it with other non-touch pointer types. If you need to see whether a stylus produces a touch contact, watch whether an identifier appears. If the status line says the pointer was not a touch contact, the browser did not deliver it as one in this session.</p>
+
+    <h2>Unhit regions belong to this test surface</h2>
+    <p>The surface is divided into eight columns and six rows. When a stored touch position falls inside a cell, that cell is marked as hit for the rest of the session. Cells that never receive a position, while at least one other cell has, are described as unhit regions. The count is a description of this canvas during this visit. It is not a map of dead zones in the digitizer, and it is not a diagnosis of a broken panel. A finger that never crossed a cell leaves that cell unhit even when the glass is fine. A finger that the browser never reported also leaves a cell unhit. Edges can be easy to miss because the contact has to land inside the surface rectangle the page measured.</p>
+    <p>Before any in-bounds touch has been stored, the page does not list unhit regions. An empty session is not a screen full of faults. After you have drawn across the surface, use the unhit count together with the marks you can see. Then press Reset test and try the same path again. A cell that is unhit once and hit on the next pass was a gap in that first session’s events. A cell that stays unhit after several careful passes is still only a gap in the events this browser delivered to this page. Compare another browser, another pair of clean hands, and another device before you decide the hardware needs service. This site does not schedule that service and does not rank panels.</p>
+    <p>The grid is a reading aid for this rectangle. It is not a millimeter calibration target, and it does not account for the operating system’s own edge gestures. A system gesture can cancel a contact before it crosses the cell you expected. When that happens, the identifier is recorded as cancelled, the current count drops, and the cells that never received a position stay unhit. Cancelled means the browser ended the contact with a cancel event. It does not mean the panel failed.</p>
+
+    <h2>How Touch Events relate to Pointer Events</h2>
+    <p>Modern browsers also dispatch Pointer Events. A pointer event has a pointer type such as mouse, pen, or touch. This page does not treat mouse or pen pointers as multi-touch contacts. When the browser provides Touch Events, those events are the source of the contact list, because they already group the active touch points. Pointer events of type touch are used only where Touch Events are absent, so the same finger is not stored twice under two different listeners. The <a href="https://www.w3.org/TR/pointerevents/" rel="noopener noreferrer">Pointer Events specification</a> defines the pointer type and the coordinates a page can read. It does not promise that every physical finger becomes a script-visible pointer, and it does not give a page a hardware health bit.</p>
+    <p><code>touchcancel</code> can arrive when the browser takes the gesture away, for example when a system gesture claims the contact. The page removes that contact from the active list and records the identifier as cancelled. <code>touchend</code> removes it and records the identifier as ended. In both cases the max-simultaneous figure keeps the earlier peak. You can start again from an empty list with Reset test without confusing that peak with the next gesture.</p>
+
+    <h2>Use the numbers without overclaiming</h2>
+    <p>Write down the max simultaneous value, the identifiers, and whether the capability line said the browser reported no touch points. Repeat the same gesture after a reset. If you are comparing two browsers on one phone, keep the same fingers and the same area of the surface. Differences can come from the browser as well as from the glass. This page will not convert those differences into a grade, a score, or a repair instruction.</p>
+    <p>Related input checks stay on their own questions. The <a href="/mouse-test">Mouse Test</a> records buttons and pointer movement. The <a href="/mouse-polling-rate-test">Polling Rate Test</a> estimates how often pointer events arrive. The <a href="/keyboard-test">Keyboard Test</a> records keys. The <a href="/reaction-time-test">Reaction Time Test</a> times a click after a cue. None of those pages counts simultaneous touch contacts, and this page does not measure polling, keys, or a display refresh rate.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>
