@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RefreshRateTool from '../../components/RefreshRateTool.astro';
+import NewToolRelatedTests from '../../components/NewToolRelatedTests.astro';
+import FAQ from '../../components/FAQ.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../../config';
+
+const description = 'Estimate a browser display refresh rate from animation-frame intervals. This is requestAnimationFrame timing, not a panel, EDID, or hardware reading.';
+const faq = [
+  { question: 'Does this refresh rate test read my monitor specification?', answer: 'No. It times gaps between requestAnimationFrame callbacks in this browser tab. It does not read EDID, the panel controller, or the operating-system display mode, and it is not a certified hardware measurement.' },
+  { question: 'Why can the frame-interval estimate change between runs?', answer: 'The browser, vsync, power saving, other programs, and a hidden tab can all change when animation frames are delivered. Repeat the sample with this tab visible and compare the median interval, not a single glance at the hertz figure.' },
+  { question: 'What happens if the tab is in the background?', answer: 'Background tabs often throttle animation frames. This page stops the sample and does not turn a stalled or tiny sample into a hertz number. Bring the tab forward and start again if you want another estimate.' },
+];
+const related = [
+  { href: '/motion-blur-test', title: 'Motion Blur Test', description: 'Compare a moving pattern visually. It does not measure hertz.', icon: '↔' },
+  { href: '/dead-pixel-test', title: 'Dead Pixel Test', description: 'Inspect solid colors for pixels that stay different.', icon: '▦' },
+  { href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate pointer-event timing, which is a different question.', icon: '⌁' },
+  { href: '/gray-uniformity-test', title: 'Gray Uniformity Test', description: 'Compare flat gray fields across the screen.', icon: '◩' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Browser Display Refresh Rate Test', url: absoluteUrl('/refresh-rate-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Refresh Rate Test: Frame Interval Estimate" {description} path="/refresh-rate-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Refresh Rate Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Browser Display Refresh Rate Test</h1>
+    <p>Sample animation-frame timestamps in this tab and convert their spacing into a hertz estimate.</p>
+  </section>
+  <RefreshRateTool />
+  <article class="content">
+    <h2>How to use this browser display refresh rate test</h2>
+    <p>Press Start test and leave this tab in the foreground for a little over a second. The tool records the timestamp passed to each <code>requestAnimationFrame</code> callback, then stops on its own. Stop test ends the sample early, and Reset test clears the figures so you can begin again. Until enough frames have been collected, the hertz line stays blank. A short or interrupted run is reported as insufficient data rather than turned into a confident number.</p>
+    <p>Read the frame-interval estimate together with the raw context beside it: how many frames were kept, how long the sample lasted, and the minimum, median, and maximum inlier intervals. The median is the interval the hertz figure is based on. The minimum and maximum show whether the kept gaps were tightly grouped or spread out. If the status line says frames stalled or the tab was hidden, treat that run as incomplete even if a number appears from the frames collected before the interruption.</p>
+    <p>For a repeatable comparison, use the same browser, the same power setting, and the same display mode. Close heavy work that makes the page stutter, then run the sample two or three times. Write down the median interval as well as the hertz figure. A single run that was interrupted by a notification, a background download, or a laptop switching power modes is a weak comparison against a later calm run.</p>
+
+    <h2>What a frame-interval estimate measures</h2>
+    <p>A display refresh rate, in everyday specifications, is how often a panel is intended to present a new image, counted in hertz. This page does not observe the panel. It observes how often this browser delivers animation frames to the page. Those callbacks are the moments when the page is allowed to update an animation. The gap between two callbacks is one interval. Dividing 1000 by an interval in milliseconds converts that gap into a rate. A steady 16.67 millisecond gap corresponds to about 60 hertz. That arithmetic describes the collected timestamps. It does not certify that the panel scanned at that rate for the whole sample.</p>
+    <p>The browser sits in a larger chain. Page script, rendering, the compositor, the graphics driver, vsync, and the display mode can all influence when a callback runs. A busy main thread can deliver a callback late. A hidden tab can be throttled so that callbacks arrive far apart. Power saving can slow frame delivery even while the tab looks open. Because of that chain, two computers with the same monitor model can show different estimates, and the same computer can show different estimates a minute apart. The useful question is whether this tab’s frame spacing was steady during the sample you just took.</p>
+
+    <h2>Why this is not the monitor panel refresh rate</h2>
+    <p>Monitor makers and operating systems describe refresh rate as a display mode. A mode list might include 60 Hz or a higher rate the panel and the connection are set up to use. That mode is selected outside the page, in system settings or in the monitor’s own controls. This tool never reads that list. It does not query EDID, which is the identification data a display can offer over the video connection, and it does not ask the graphics driver for the active mode. Nothing on this page is a hardware truth, a warranty check, or a statement that “your monitor is” a particular hertz value.</p>
+    <p>An estimate can land near a familiar mode without proving the mode. It can also land elsewhere while the operating system still reports a different mode. Both outcomes are compatible with the method. Frame delivery can be capped by vsync to the current mode, or it can be irregular because the browser was busy. If you need the configured mode, read it in the operating system’s display settings. Use this page only as a browser-side look at animation-frame spacing, and keep the disclaimer above the fold in mind whenever you quote the number.</p>
+    <p>The same limit applies if the figure is higher or lower than you expected. A higher number is not a discovery that the panel exceeds its specification. A lower number is not, by itself, a failed panel. Tab throttling, a low-power profile, a remote desktop session, a browser that is under load, and vsync behavior are ordinary reasons for the spacing to change. Compare conditions one at a time, and do not treat the page as a service diagnosis.</p>
+
+    <h2>How requestAnimationFrame samples become hertz</h2>
+    <p>The <a href="https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames" rel="noopener noreferrer">HTML specification’s animation frame section</a> defines <code>requestAnimationFrame</code> as a way for a page to run a callback before the next repaint, receiving a high-resolution timestamp. The specification describes the callback and its ordering. It does not promise a particular hertz value, and it does not give the page a direct reading of the monitor’s electronics. This tool stores those timestamps and studies the gaps between them.</p>
+    <p>Not every gap is kept. Gaps shorter than 1 millisecond or longer than 100 milliseconds are set aside. The short ones are too brief to treat as a display interval, and the long ones look like stalls rather than a steady cadence. From the remaining gaps, the tool takes a median and then drops intervals that are more than 1.75 times that median or smaller than the median divided by 1.75. The hertz figure is 1000 divided by the median of the intervals that remain. The mean of those same intervals is available as context; the published rate follows the median so that a few leftover spikes do not set the headline number. The rule is fixed: the same timestamps always produce the same estimate.</p>
+    <p>The page also refuses to invent a rate from a thin sample. It asks for at least eight kept intervals and at least 200 milliseconds from the first timestamp to the last. One frame, two frames, an empty sample, and other very short runs stop at “not enough frames” or an equivalent insufficient state. A run made only of long stalls, such as half-second gaps, does not become a low hertz reading. The hertz line stays blank and the status line says why.</p>
+
+    <h2>What can change the intervals</h2>
+    <p>Keep the tab visible. Browsers commonly slow <code>requestAnimationFrame</code> when a tab is in the background, sometimes to a trickle that has nothing to do with the display mode. This page watches for a hidden document and for a gap longer than 250 milliseconds while it is sampling. Either event stops the run. If enough clean frames were already stored, you may still see an estimate computed only from those earlier frames, with a status line that says sampling stopped. If the interruption came first, you will see an honest stalled or background state and no hertz figure.</p>
+    <p>Power saving, thermal limits, and a laptop on battery can change frame delivery even when the tab is visible. So can a busy page, an extension, a video call, or a game running beside the browser. Vsync can align callbacks to the display’s current mode, which is why a calm sample sometimes clusters near a familiar interval. That alignment is still an observation about callbacks, not a readout of the panel. Switching browsers can also change the result, because scheduling and background-timer policies are not identical. When you compare, change one thing and run the sample again under the same kind of load.</p>
+    <p>A high-refresh display mode does not guarantee that this tab will be scheduled at that mode’s full rate. The graphics system may present frames at the mode rate while the page’s main thread updates less often. The opposite can also happen for a moment: a burst of short gaps can appear when callbacks catch up. Those bursts are why the tool prefers a median of inliers over the single shortest gap. Quote the median interval and the sample length if you describe a run to someone else.</p>
+
+    <h2>Compare a display setting without overclaiming</h2>
+    <p>If you are curious whether a settings change altered frame delivery to this browser, collect a sample before the change and another after it. Leave the same windows open, keep the tab focused, and use Reset test so the old timestamps are gone. Look at whether the median interval moved in a way you can repeat, not at whether one decimal on the hertz line looks impressive. Then return the setting to the original value and sample once more. A difference that disappears when you restore the setting is more informative than a one-time number.</p>
+    <p>Do not chain this result to a claim about motion clarity, input lag, or brightness. Those are different questions. A moving pattern can look smeared on a display that is also delivering steady frames, and a display can look sharp in a still image while this tab’s callbacks are uneven. Use the operating system’s mode list when you need the configured refresh mode, and use a method designed for lab measurement when you need a panel specification. This page is a short, local sample of browser frame timing.</p>
+
+    <h2>Related display and timing checks</h2>
+    <p>The <a href="/motion-blur-test">Motion Blur Test</a> shows a moving high-contrast target so you can compare how motion looks. Its speed control is a CSS animation setting, not a measured refresh rate, and that page says so. The <a href="/dead-pixel-test">Dead Pixel Test</a> and the <a href="/gray-uniformity-test">Gray Uniformity Test</a> are still-image inspections of color fields and gray fields. The <a href="/mouse-polling-rate-test">Polling Rate Test</a> estimates how often pointer events arrive, which is browser input timing rather than animation-frame timing. Keep those notes separate from the frame-interval estimate on this page.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

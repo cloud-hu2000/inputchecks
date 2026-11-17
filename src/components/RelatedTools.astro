@@ -12,6 +12,9 @@ const tools = {
   ghosting: { href: '/keyboard-ghosting-test', title: 'Keyboard Ghosting Test', description: 'Check simultaneous key presses.', icon: '▦' },
   spacebar: { href: '/spacebar-test', title: 'Spacebar Test', description: 'Check every spacebar press.', icon: '▁' },
   reaction: { href: '/reaction-time-test', title: 'Reaction Time Test', description: 'Measure visual reaction time.', icon: '◌' },
+  refresh: { href: '/refresh-rate-test', title: 'Refresh Rate Test', description: 'Estimate browser frame intervals.', icon: '↻' },
+  touch: { href: '/touch-screen-test', title: 'Touch Screen Test', description: 'Record browser touch contacts.', icon: '⧉' },
+  dpi: { href: '/mouse-dpi-test', title: 'Mouse DPI Test', description: 'Calculate effective DPI from a measured path.', icon: '⌖' },
 } as const;
 const related: Record<string, Array<keyof typeof tools>> = {
   wheel: ['mouse', 'polling', 'double', 'keyboard'], mouse: ['wheel', 'double', 'polling', 'keyboard'],
@@ -19,6 +22,9 @@ const related: Record<string, Array<keyof typeof tools>> = {
   cps: ['double', 'reaction', 'keyboard', 'mouse'], keyboard: ['ghosting', 'spacebar', 'cps', 'mouse'],
   ghosting: ['keyboard', 'spacebar', 'cps', 'mouse'], spacebar: ['keyboard', 'ghosting', 'cps', 'reaction'],
   reaction: ['cps', 'double', 'keyboard', 'mouse'],
+  refresh: ['polling', 'reaction', 'mouse', 'cps'],
+  touch: ['mouse', 'polling', 'keyboard', 'reaction'],
+  dpi: ['mouse', 'polling', 'double', 'reaction'],
 };
 const troubleshooting: Record<string, Array<{ href: string; title: string }>> = {
   wheel: [
