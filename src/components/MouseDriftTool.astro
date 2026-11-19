@@ -1,0 +1,48 @@
+<section class="tester drift-tester" data-drift-tester>
+  <div class="drift-toolbar">
+    <div class="drift-durations" role="group" aria-label="Stationary period length">
+      <button class="button secondary" type="button" data-drift-duration="5000" aria-pressed="false">5 seconds</button>
+      <button class="button primary" type="button" data-drift-duration="10000" aria-pressed="true">10 seconds</button>
+      <button class="button secondary" type="button" data-drift-duration="15000" aria-pressed="false">15 seconds</button>
+    </div>
+    <button class="button primary" type="button" data-drift-start>Start</button>
+    <button class="button secondary" type="button" data-drift-reset>Reset test</button>
+  </div>
+  <div class="metrics">
+    <div><span>Period</span><strong data-drift-period>10 s selected</strong></div>
+    <div><span>Pointer events</span><strong data-drift-events>Not started</strong></div>
+    <div><span>Movement X</span><strong data-drift-movex>Not started</strong></div>
+    <div><span>Movement Y</span><strong data-drift-movey>Not started</strong></div>
+    <div><span>Step length sum</span><strong data-drift-steps>Not started</strong></div>
+    <div><span>Largest step</span><strong data-drift-largest>Not started</strong></div>
+    <div><span>Net position</span><strong data-drift-net>Not started</strong></div>
+    <div><span>Pointer type</span><strong data-drift-type>Not started</strong></div>
+  </div>
+  <canvas class="drift-canvas" data-drift-surface width="640" height="180" aria-label="Recorded pointer position change"></canvas>
+  <p data-drift-plot-note>The plot stays empty until a recorded pointermove includes both clientX and clientY. The pointer can rest anywhere in this browser window.</p>
+  <p class="drift-status" data-drift-status aria-live="polite">Choose 5, 10, or 15 seconds, then press Start. A 3-second countdown runs before pointermove events are stored. Leave the pointer still during the recording.</p>
+  <p class="callout" data-drift-disclaimer>Movement X, movement Y, step length, and net position come from pointermove events during the stationary period you start. Missing figures were not in those events. This is not a sensor fault verdict.</p>
+</section>
+<script src="./mouse-drift/client.ts"></script>
+<style>
+  .drift-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 8px; }
+  .drift-durations { display: flex; flex-wrap: wrap; gap: 8px; }
+  .drift-toolbar .button { margin: 0; }
+  .drift-toolbar .button[aria-pressed="true"] { outline: 2px solid var(--accent-dark); outline-offset: 1px; }
+  .drift-toolbar .button:disabled { opacity: 0.55; cursor: default; }
+  .drift-canvas {
+    width: 100%;
+    height: 180px;
+    display: block;
+    background: var(--canvas);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .drift-tester .metrics { grid-template-columns: repeat(2, 1fr); }
+  .drift-tester .metrics strong { white-space: normal; overflow-wrap: anywhere; font-size: 1rem; }
+  .drift-tester [data-drift-plot-note],
+  .drift-status { margin: 8px 0; color: var(--muted); font-size: .92rem; }
+  @media (min-width: 900px) {
+    .drift-tester .metrics { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>

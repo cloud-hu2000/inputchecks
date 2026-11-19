@@ -1,0 +1,47 @@
+<section class="tester tone-tester" data-tone-tester>
+  <div class="tone-controls">
+    <label class="tone-field" for="tone-frequency">Frequency (Hz)
+      <input id="tone-frequency" data-tone-frequency type="number" inputmode="numeric" min="1" max="20000" step="1" value="440" />
+    </label>
+    <fieldset class="tone-waves">
+      <legend>Waveform</legend>
+      <label><input type="radio" name="tone-waveform" value="sine" checked /> Sine</label>
+      <label><input type="radio" name="tone-waveform" value="square" /> Square</label>
+      <label><input type="radio" name="tone-waveform" value="sawtooth" /> Sawtooth</label>
+      <label><input type="radio" name="tone-waveform" value="triangle" /> Triangle</label>
+    </fieldset>
+    <label class="tone-field tone-gain" for="tone-gain">Gain position, 0 to 100
+      <input id="tone-gain" data-tone-gain type="range" min="0" max="100" step="1" value="30" />
+    </label>
+    <button class="button primary" type="button" data-tone-play>Play</button>
+    <button class="button secondary" type="button" data-tone-stop disabled>Stop</button>
+  </div>
+  <div class="metrics">
+    <div><span>Applied frequency</span><strong data-tone-hz>440 Hz</strong></div>
+    <div><span>Waveform</span><strong data-tone-wave>sine</strong></div>
+    <div><span>Linear gain</span><strong data-tone-gain-value>0.15</strong></div>
+    <div><span>Gain position</span><strong data-tone-position>30</strong></div>
+    <div><span>Sample rate</span><strong data-tone-rate>Not started</strong></div>
+    <div><span>Oscillator</span><strong data-tone-state>Not started</strong></div>
+  </div>
+  <p class="tone-status" data-tone-status aria-live="polite">Set a frequency from 1 to 20000 Hz, choose sine, square, sawtooth, or triangle, then press Play. Nothing is playing.</p>
+  <p class="callout" data-tone-disclaimer>Play starts one Web Audio oscillator at the frequency and waveform selected above. This is a browser oscillator. It does not test hearing, match tinnitus, or measure frequency response.</p>
+</section>
+<script src="./tone-generator/client.ts"></script>
+<style>
+  .tone-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 0 0 8px; }
+  .tone-field { display: flex; flex-direction: column; gap: 4px; font-size: .92rem; color: var(--muted); }
+  .tone-field input[type="number"] { width: 8.5rem; font: inherit; color: var(--ink); padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .tone-waves { border: 1px solid var(--line); border-radius: 10px; margin: 0; padding: 8px 10px 10px; display: flex; flex-wrap: wrap; gap: 8px 12px; }
+  .tone-waves legend { padding: 0 4px; color: var(--muted); font-size: .92rem; }
+  .tone-waves label { display: inline-flex; gap: 6px; align-items: center; }
+  .tone-gain input[type="range"] { width: min(220px, 70vw); }
+  .tone-controls .button { margin: 0; }
+  .tone-controls .button:disabled { opacity: .55; cursor: default; }
+  .tone-tester .metrics { grid-template-columns: repeat(2, 1fr); }
+  .tone-tester .metrics strong { white-space: normal; overflow-wrap: anywhere; font-size: 1rem; }
+  .tone-status { margin: 8px 0; color: var(--muted); font-size: .92rem; }
+  @media (min-width: 900px) {
+    .tone-tester .metrics { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
