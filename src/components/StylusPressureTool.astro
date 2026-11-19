@@ -1,0 +1,74 @@
+<section class="tester stylus-tester" data-stylus-tester>
+  <div class="stylus-toolbar">
+    <button class="button primary" type="button" data-stylus-reset>Reset test</button>
+  </div>
+  <canvas
+    class="stylus-canvas"
+    data-stylus-surface
+    width="640"
+    height="280"
+    aria-label="Stylus pressure and tilt surface"
+  ></canvas>
+  <div class="metrics">
+    <div><span>Pointer type</span><strong data-stylus-pointer-type>No pointer event yet</strong></div>
+    <div><span>Pressure</span><strong data-stylus-pressure>No pointer event yet</strong></div>
+    <div><span>Tilt X</span><strong data-stylus-tilt-x>No pointer event yet</strong></div>
+    <div><span>Tilt Y</span><strong data-stylus-tilt-y>No pointer event yet</strong></div>
+    <div><span>Azimuth</span><strong data-stylus-azimuth>No pointer event yet</strong></div>
+    <div><span>Buttons</span><strong data-stylus-buttons>No pointer event yet</strong></div>
+  </div>
+  <div class="stylus-tilt">
+    <div class="stylus-tilt-pad" aria-hidden="true">
+      <span data-stylus-tilt-marker hidden></span>
+    </div>
+    <p data-stylus-tilt-note>The tilt marker appears after an event includes both tilt X and tilt Y.</p>
+  </div>
+  <p data-stylus-stroke>Stroke width stays fixed until a pointer event includes a pressure from 0 to 1.</p>
+  <p class="stylus-status" data-stylus-status aria-live="polite">Draw with a stylus, finger, or mouse. Readings appear only after a pointer event arrives.</p>
+  <p class="callout" data-stylus-disclaimer>This shows pointer type, pressure, tilt, azimuth, and buttons from pointer events this browser delivers. A missing field is marked not provided. A number is the value that arrived, which can be a specification default when the browser has no sensor reading. This is not a hardware certification.</p>
+</section>
+<script src="./stylus-pressure/client.ts"></script>
+<style>
+  .stylus-toolbar { display: flex; justify-content: flex-start; margin: 0 0 8px; }
+  .stylus-toolbar .button { margin: 0; }
+  .stylus-canvas {
+    width: 100%;
+    height: 220px;
+    display: block;
+    background: var(--canvas);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .stylus-tester .metrics { grid-template-columns: repeat(2, 1fr); }
+  .stylus-tester .metrics strong { white-space: normal; overflow-wrap: anywhere; font-size: 1rem; }
+  .stylus-tilt { display: flex; gap: 14px; align-items: center; margin: 0 0 8px; }
+  .stylus-tilt-pad {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background:
+      linear-gradient(var(--line), var(--line)) center / 1px 100% no-repeat,
+      linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat,
+      var(--canvas);
+  }
+  .stylus-tilt-pad span {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    margin: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+  }
+  .stylus-tester [data-stylus-tilt-note],
+  .stylus-tester [data-stylus-stroke],
+  .stylus-status { margin: 0 0 8px; color: var(--muted); font-size: .92rem; }
+  @media (min-width: 900px) {
+    .stylus-tester .metrics { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>

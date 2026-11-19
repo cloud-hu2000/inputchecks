@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import StylusPressureTool from '../../components/StylusPressureTool.astro';
+import NewToolRelatedTests from '../../components/NewToolRelatedTests.astro';
+import FAQ from '../../components/FAQ.astro';
+import JsonLd from '../../components/seo/JsonLd.astro';
+import { absoluteUrl } from '../../config';
+
+const description = 'Show pointerType, pressure, tilt, azimuth, and buttons from events this browser sends. Missing fields say not provided. This is not a hardware certification.';
+const faq = [
+  { question: 'Does this stylus pressure and tilt test certify the pen?', answer: 'No. It prints pointer type, pressure, tilt X, tilt Y, azimuth, and buttons from the pointer events this browser delivers. It does not read a tablet driver, a HID report, or a factory calibration, and it does not issue a hardware verdict.' },
+  { question: 'Why can pressure be 0.5, and tilt or azimuth be 0, on the first press?', answer: 'The Pointer Events specification requires those defaults when the platform does not report the sensor. Pressure must be 0.5 while a button is active and 0 otherwise. Tilt must be 0. Azimuth must be 0, including when the pen is perpendicular to the surface. A real reading can be the same number. This page shows the number and cannot tell those cases apart.' },
+  { question: 'What does “Not provided” mean?', answer: 'It means that field was absent, pointer type was blank, or the value was not a finite number. It does not mean the number zero. Zero, 0.5, and any other finite value are shown as sent. Before any pointer event arrives, the page says “No pointer event yet” instead.' },
+  { question: 'Will a mouse or a finger fail the test?', answer: 'No. A mouse often arrives as pointer type mouse, and a finger as touch. Those strings are shown as sent. The page does not relabel them as a failed pen, and it does not hide them.' },
+];
+const related = [
+  { href: '/touch-screen-test', title: 'Touch Screen Test', description: 'Count touch contacts and positions.', icon: '⧉' },
+  { href: '/mouse-test', title: 'Mouse Test', description: 'Check buttons, movement, and wheel input.', icon: '◉' },
+  { href: '/mouse-polling-rate-test', title: 'Polling Rate Test', description: 'Estimate pointer-event timing, a different question.', icon: '⌁' },
+  { href: '/keyboard-test', title: 'Keyboard Test', description: 'Check keys that reach this browser tab.', icon: '⌨' },
+];
+const schema = [
+  { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Stylus Pen Pressure and Tilt Test', url: absoluteUrl('/stylus-pressure-test'), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+  { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((item) => ({ '@type': 'Question', name: item.question, acceptedAnswer: { '@type': 'Answer', text: item.answer } })) },
+];
+---
+
+<BaseLayout title="Stylus Pen Pressure and Tilt Test" {description} path="/stylus-pressure-test">
+  <JsonLd data={schema} />
+  <Breadcrumbs items={[{ label: 'Stylus Pressure Test' }]} />
+  <section class="page-hero shell compact">
+    <h1>Stylus Pen Pressure and Tilt Test</h1>
+    <p>Read the pointer type, pressure, tilt, azimuth, and buttons on each pointer event this browser delivers to the drawing surface.</p>
+  </section>
+  <StylusPressureTool />
+  <article class="content">
+    <h2>How to use this stylus pen pressure and tilt test</h2>
+    <p>Draw on the surface with the pointer you want to observe. A stylus, a finger, and a mouse are all accepted. The surface is the canvas in the tool. On the first pointer event, the six readings leave the waiting state and show what that event carried: pointer type, pressure, tilt X, tilt Y, azimuth, and buttons. Hovering over the canvas updates those readings without drawing. Pressing and moving draws a stroke. Reset test clears the stroke, the tilt marker, and every reading so the next try starts with no pointer event stored.</p>
+    <p>The stroke width follows pressure only when that value is a finite number from 0 through 1. Zero uses the thinnest stroke. One uses the thickest. A missing pressure, or a pressure outside that range, keeps a fixed width, and the pressure line still shows the number when a number arrived. The width is a drawing of the event value. It is not a conversion into grams or millimeters.</p>
+    <p>The small pad beside the note plots tilt. Positive tilt X moves the dot to the right. Positive tilt Y moves it down, which is the direction the <a href="https://www.w3.org/TR/pointerevents/" rel="noopener noreferrer">Pointer Events specification</a> calls toward the user. The center means both angles were 0. The dot stops at the edge once an angle reaches 90 degrees in either direction, while the tilt numbers above the pad keep the full value, even if it is past that range. If either tilt angle was not provided, the dot stays hidden.</p>
+    <p>Write down the six readings and the pointer id in the status line if you want to compare two tries. Reset test, then repeat the same motion. A single sample can change because the browser coalesces movement, a button changes, or the pointer leaves the canvas. This page keeps the latest event, not a score across the session.</p>
+
+    <h2>Pressure is the number on the pointer event</h2>
+    <p>Pressure on this page is the <code>pressure</code> property of the pointer event. The specification defines it as a normalized value from 0 to 1, where 0 is the minimum the hardware can detect and 1 is the maximum. When you press and the event contains 0.25, the page prints 0.25. That is one quarter of the way across the specified range. The page does not turn 0.25 into a force in newtons, and it does not compare it with a pen the site has never seen.</p>
+    <p>Platforms that do not support pressure must still fill the property. The specification says the value must be 0.5 while buttons are active and 0 otherwise. A mouse click often arrives that way: pointer type mouse, buttons showing the contact bit, and pressure 0.5. A pen that truly reports half of its range can also send 0.5. Both events look the same to a web page. The reading stays 0.5, and the status line does not relabel it as a sensor failure or as proof that pressure works. If you vary the force and the number never leaves 0 or 0.5, that pattern is consistent with the default. It is still only a description of the events you stored, and the next browser or the next device can differ.</p>
+    <p>A pressure outside 0 to 1 is shown unchanged. The stroke width does not use it, because a width mapped from outside that range would pretend the specification’s scale still applied. The sentence under the readings says the width stayed fixed and that the number above is the value the browser sent. A non-finite pressure, such as a value that is not a number, is marked not provided. The previous finite reading is replaced only by a newer event. Reset test is what returns the line to the waiting text.</p>
+
+    <h2>Tilt X, tilt Y, and azimuth</h2>
+    <p>Tilt is two angles, in degrees. Tilt X is the angle between the Y-Z plane and the plane that contains the stylus axis and the Y axis. Positive tilt X points to the right. Tilt Y is the angle between the X-Z plane and the plane that contains the stylus axis and the X axis. Positive tilt Y points toward the user. Each value is specified in the range from -90 to 90. If the event contains tilt X 30 and tilt Y 0, the page prints 30° and 0°. Those are the numbers that arrived. They are not a grade, and they are not a measurement this site made with a protractor.</p>
+    <p>Hardware and platforms that do not report tilt must send 0 for both angles. A stylus held straight to the screen can also produce 0 and 0. The page cannot split those cases. It prints 0° and 0°, puts the marker in the center, and leaves the interpretation in the sentence you can read here. If you rock the pen and both numbers stay at 0 for every event, you are seeing a flat series. Quote the series, including the pointer type, rather than a conclusion about the digitizer.</p>
+    <p>Azimuth is the <code>azimuthAngle</code> property, in radians. Zero points in the direction of increasing X, which the specification describes as 3 o’clock if you look straight down. The angle increases clockwise: π/2 at 6 o’clock, π at 9 o’clock, and 3π/2 at 12 o’clock. The page prints the radians it received and, in parentheses, the same value converted to degrees by multiplying by 180/π. An azimuth of π/6 radians is about 0.5236 rad and exactly 30 degrees under that conversion. The degree figure is arithmetic on the radian value. It is not a second sensor.</p>
+    <p>When the stylus is perpendicular to the surface, the specification says azimuth must be 0. It also says azimuth must be 0 when tilt or angle is not reported. Again the page shows 0 and does not choose between those reasons. This page does not add a separate altitude reading. If the <code>azimuthAngle</code> property is missing, or is not a finite number, the azimuth line says not provided. The page does not invent an azimuth from tilt X and tilt Y, even though the specification publishes a conversion between the two pairs. A derived angle would be a value this event did not carry.</p>
+
+    <h2>Pointer type and buttons</h2>
+    <p>Pointer type is the string on the event. The specification uses <code>mouse</code>, <code>pen</code>, and <code>touch</code>. An empty string means the browser did not name a type, and this page reports that empty string as not provided. Any other non-blank string is printed as it arrived, including a vendor-prefixed type. The page does not rewrite a string into <code>pen</code>, and it does not keep a list of stylus brands. A mouse event that says mouse is a successful reading of a mouse event. A touch event that says touch is a successful reading of a touch event. Neither one is converted into a pen result.</p>
+    <p>Buttons are two properties. <code>buttons</code> is a bitmask of the buttons currently down. <code>button</code> is the button whose state changed, or -1 when no button changed. The names used here follow the <a href="https://www.w3.org/TR/pointerevents/#the-buttons-property" rel="noopener noreferrer">Pointer Events button tables</a>. For <code>buttons</code>, 1 is contact (left mouse, pen contact, or touch contact), 2 is secondary (right mouse or pen barrel), 4 is middle, 8 is back, 16 is forward, and 32 is the pen eraser. Combined bits are added: 33 is contact and eraser. For the singular <code>button</code> property the numbers differ: -1 is no change, 0 is contact, 1 is middle, 2 is secondary, 5 is the eraser transition, and the back and forward transitions are 3 and 4. A value outside those tables is printed as a number without a name. A negative <code>buttons</code> value, or a value that is not a whole number, is printed without bit names because it is not that bitmask.</p>
+    <p>While you drag, <code>button</code> may stay at -1 even though <code>buttons</code> still shows the contact bit. That matches the specification: a move does not by itself change a button. Read both. The status line repeats the same pair so a copied sentence matches the six cells. The page does not decide which contact was intentional, and it does not drop a pointer because of where it landed.</p>
+
+    <h2>Missing fields stay marked not provided</h2>
+    <p>Before the canvas receives a pointer event, every cell says “No pointer event yet.” That waiting text is not a claim that the browser lacks the field. It means this page has not stored an event. After an event, each field is judged on its own. A present finite number is shown. A present pointer-type string is shown. An absent property, a blank pointer type, or a non-finite number becomes “Not provided” for that field only. The other fields from the same event still appear. One event can therefore show a pressure and also say that azimuth was not provided.</p>
+    <p>The same stored fields always produce the same words. Reset test discards them. The page does not fill a gap with the last session, a typical pen curve, or a zero disguised as a real tilt. Zero is reserved for an event that actually contained zero. If you need a clean sample, press Reset test, then make one stroke and copy the status line before the next event replaces it.</p>
+
+    <h2>What this page does not conclude</h2>
+    <p>Nothing on the page is a hardware certification. A full set of numbers does not mean a pen is healthy, and a string of defaults does not mean it is broken. The browser, the operating system, and the digitizer all sit between the stylus and this script. A remote desktop, a browser that omits azimuth, or a setting that turns pen input into mouse input can change the event without any change you can see in the glass. Compare another browser on the same computer before you describe the device. This site does not rank pens and does not schedule a repair.</p>
+    <p>The <a href="/touch-screen-test">Touch Screen Test</a> counts touch contacts and positions. It does not report pressure, tilt, or azimuth. This page does not count a multi-touch grid. The <a href="/mouse-test">Mouse Test</a> records buttons and movement for a mouse check. The <a href="/mouse-polling-rate-test">Polling Rate Test</a> estimates how often pointer events arrive. The <a href="/keyboard-test">Keyboard Test</a> records keys. Use those pages for those questions. Use this one when the question is which pointer type, pressure, tilt, azimuth, and buttons the browser delivered.</p>
+    <NewToolRelatedTests tests={related} />
+    <FAQ items={faq} />
+  </article>
+</BaseLayout>

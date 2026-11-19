@@ -18,6 +18,7 @@ InputChecks helps visitors check common input symptoms with focused, no-account 
 - [Browser Refresh Rate Test](https://inputchecks.com/refresh-rate-test): Estimate a display refresh rate from requestAnimationFrame intervals. This is a frame-timing estimate, not an EDID or panel specification.
 - [Touch Screen Test](https://inputchecks.com/touch-screen-test): Record touch contacts, identifiers, and positions the browser delivers. This is not a hardware certification or a factory calibration.
 - [Effective Mouse DPI Test](https://inputchecks.com/mouse-dpi-test): Calculate effective on-screen DPI from a measured distance and pointer travel in CSS pixels. The browser cannot read sensor DPI. eDPI is shown only from DPI and sensitivity you enter.
+- [Stylus Pressure and Tilt Test](https://inputchecks.com/stylus-pressure-test): Show pointer type, pressure, tilt, azimuth, and buttons from pointer events this browser sends. Missing fields are marked not provided. This is not a hardware certification.
 
 ## Guides
 

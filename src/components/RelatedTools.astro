@@ -15,6 +15,7 @@ const tools = {
   refresh: { href: '/refresh-rate-test', title: 'Refresh Rate Test', description: 'Estimate browser frame intervals.', icon: '↻' },
   touch: { href: '/touch-screen-test', title: 'Touch Screen Test', description: 'Record browser touch contacts.', icon: '⧉' },
   dpi: { href: '/mouse-dpi-test', title: 'Mouse DPI Test', description: 'Calculate effective DPI from a measured path.', icon: '⌖' },
+  stylus: { href: '/stylus-pressure-test', title: 'Stylus Pressure Test', description: 'Read pressure, tilt, and azimuth.', icon: '✎' },
 } as const;
 const related: Record<string, Array<keyof typeof tools>> = {
   wheel: ['mouse', 'polling', 'double', 'keyboard'], mouse: ['wheel', 'double', 'polling', 'keyboard'],
@@ -25,6 +26,7 @@ const related: Record<string, Array<keyof typeof tools>> = {
   refresh: ['polling', 'reaction', 'mouse', 'cps'],
   touch: ['mouse', 'polling', 'keyboard', 'reaction'],
   dpi: ['mouse', 'polling', 'double', 'reaction'],
+  stylus: ['touch', 'mouse', 'polling', 'keyboard'],
 };
 const troubleshooting: Record<string, Array<{ href: string; title: string }>> = {
   wheel: [
